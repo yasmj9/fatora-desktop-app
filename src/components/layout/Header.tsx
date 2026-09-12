@@ -8,7 +8,7 @@ interface HeaderProps {
 const PAGE_TITLES: Record<NavPageId, { title: string; subtitle: string }> = {
   accueil: {
     title: "Accueil",
-    subtitle: "Bienvenue sur votre espace de gestion artisanale",
+    subtitle: "Bienvenue sur votre espace de gestion et facturation",
   },
   factures: {
     title: "Factures",
@@ -35,7 +35,7 @@ const PAGE_TITLES: Record<NavPageId, { title: string; subtitle: string }> = {
 export const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const currentInfo = PAGE_TITLES[currentPage] || {
     title: "Fatora",
-    subtitle: "Gestion Artisan",
+    subtitle: "Gestion de Facturation",
   };
 
   return (

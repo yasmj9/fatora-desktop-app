@@ -296,7 +296,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
                 id="company-address-input"
                 rows={2}
                 {...register("address")}
-                placeholder="Ex: 24 Rue des Artisans, Quartier Industriel Sidi Bernoussi"
+                placeholder="Ex: 24 Rue des Entrepreneurs, Quartier Industriel Sidi Bernoussi"
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all resize-none"
               />
             </div>
@@ -338,7 +338,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
                 htmlFor="company-contact-person-input"
                 className="block text-xs font-bold text-slate-700 mb-1.5"
               >
-                Nom du responsable / Artisan
+                Nom du responsable
               </label>
               <div className="relative">
                 <User
@@ -459,7 +459,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
         {showLegalSection && (
           <div className="p-6 border-t border-slate-200 space-y-4 bg-white">
             <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              💡 Renseignez uniquement les numéros dont vous disposez. Si vous êtes auto-entrepreneur ou artisan indépendant non assujetti, vous pouvez laisser ces cases vides.
+              💡 Renseignez uniquement les numéros dont vous disposez. Si vous êtes auto-entrepreneur ou indépendant non assujetti, vous pouvez laisser ces cases vides.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

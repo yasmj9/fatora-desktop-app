@@ -51,7 +51,7 @@ export const AccueilPage: React.FC<AccueilPageProps> = ({ onNavigate }) => {
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-md">
-                Espace Artisan
+                Espace Professionnel
               </span>
               <span className="text-xs text-slate-400 capitalize">
                 {todayFormatted}
@@ -447,7 +447,7 @@ export const AccueilPage: React.FC<AccueilPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* 5. Guide de démarrage simple pour artisan */}
+      {/* 5. Guide de démarrage simple */}
       <div className="bg-slate-50 rounded-2xl p-5 sm:p-6 border border-slate-200">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={18} className="text-blue-600 shrink-0" />

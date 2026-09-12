@@ -152,7 +152,7 @@ export const ParametresPage: React.FC = () => {
       ) : (
         /* System & Diagnostics Tab */
         <div className="space-y-6">
-          {/* Local Storage & Database Status (Artisan Friendly) */}
+          {/* Local Storage & Database Status */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">

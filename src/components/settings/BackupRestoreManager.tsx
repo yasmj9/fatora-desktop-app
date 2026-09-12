@@ -226,7 +226,7 @@ export const BackupRestoreManager: React.FC<BackupRestoreManagerProps> = ({
             <div>
               <h3 className="text-xl font-bold">Sauvegarde & Restauration de vos données</h3>
               <p className="text-slate-300 text-sm mt-1">
-                Protégez votre activité d'artisan en conservant une copie de vos factures, devis,
+                Protégez votre activité en conservant une copie de vos factures, devis,
                 clients et paramètres en lieu sûr.
               </p>
             </div>

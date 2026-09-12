@@ -574,7 +574,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
                             />
                           </div>
 
-                          {/* Quick Tax presets for Morocco / France / Artisan */}
+                          {/* Quick Tax presets for Morocco / France */}
                           <div className="flex items-center gap-1">
                             {[0, 10, 20].map((rate) => (
                               <button

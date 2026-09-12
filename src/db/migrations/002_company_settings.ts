@@ -3,7 +3,7 @@ import { Migration } from "../types";
 /**
  * Migration 002: Company Settings
  * 
- * Creates the singleton `company_settings` table to store all artisan and company configuration,
+ * Creates the singleton `company_settings` table to store all company configuration,
  * including legal identifiers, contact details, bank coordinates and document defaults.
  */
 export const migration002: Migration = {

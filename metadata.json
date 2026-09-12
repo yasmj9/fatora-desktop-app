@@ -1,6 +1,6 @@
 {
   "name": "Fatora Desktop App",
-  "description": "Offline invoice and quotation management application for artisans and small service businesses",
+  "description": "Offline invoice and quotation management application for professionals and small service businesses",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

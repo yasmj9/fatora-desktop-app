@@ -274,7 +274,7 @@ export const InvoicePaymentSection: React.FC<InvoicePaymentSectionProps> = ({
         </div>
       )}
 
-      {/* Quick Amount Shortcuts for Fast Artisan Input */}
+      {/* Quick Amount Shortcuts for Fast Input */}
       <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-700">

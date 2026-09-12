@@ -77,7 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                 Fatora
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                Gestion Artisan
+                Facturation & Devis
               </p>
             </div>
           </div>
@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
         </nav>
       </div>
 
-      {/* Bottom Section: Offline Status & Artisan Assurance */}
+      {/* Bottom Section: Offline Status & Security */}
       <div className="p-4 m-4 rounded-xl bg-slate-50 border border-slate-200/80">
         <div className="flex items-center gap-2 mb-1">
           {status === "ready" ? (

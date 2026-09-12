@@ -121,7 +121,7 @@ export const backupRepository = {
 
     const payload: BackupPayload = {
       version: "1.0",
-      app_id: "fatora_artisan",
+      app_id: "fatora_app",
       created_at: now,
       metadata: {
         company_name: companyName,
@@ -182,7 +182,7 @@ export const backupRepository = {
     const obj = parsed as Record<string, unknown>;
 
     const isFatoraBackup =
-      obj.app_id === "fatora_artisan" ||
+      obj.app_id === "fatora_app" ||
       obj.version === "1.0" ||
       (obj.tables && typeof obj.tables === "object");
 

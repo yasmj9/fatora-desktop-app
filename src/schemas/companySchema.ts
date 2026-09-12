@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const companySettingsSchema = z.object({
-  // Informations prioritaires pour l'artisan
+  // Informations prioritaires
   name: z
     .string()
     .trim()

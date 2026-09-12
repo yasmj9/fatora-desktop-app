@@ -43,7 +43,7 @@ export interface ClientSnapshot {
 }
 
 /**
- * Historical snapshot of the artisan's company at the time an invoice is created/updated.
+ * Historical snapshot of the company at the time an invoice is created/updated.
  */
 export interface SellerSnapshot {
   seller_name: string;
@@ -138,7 +138,7 @@ export interface Invoice {
   client_if: string;
   client_rc: string;
 
-  // Seller/Artisan historical snapshot
+  // Seller historical snapshot
   seller_name: string;
   seller_contact_person: string;
   seller_phone: string;
