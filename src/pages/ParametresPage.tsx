@@ -8,13 +8,17 @@ import {
   AlertTriangle,
   Building2,
   Cpu,
+  Image as ImageIcon,
+  Palette,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useDatabaseStatus } from "../context/DatabaseContext";
 import { CompanySettingsForm } from "../components/settings/CompanySettingsForm";
+import { LogoManager } from "../components/settings/LogoManager";
+import { InvoiceStyleManager } from "../components/settings/InvoiceStyleManager";
 
 export const ParametresPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"company" | "system">("company");
+  const [activeTab, setActiveTab] = useState<"company" | "logos" | "styles" | "system">("company");
   const [greetName, setGreetName] = useState("");
   const [greetMsg, setGreetMsg] = useState("");
   const [isGreeting, setIsGreeting] = useState(false);
@@ -78,6 +82,32 @@ export const ParametresPage: React.FC = () => {
           </button>
           <button
             type="button"
+            id="tab-logo-settings"
+            onClick={() => setActiveTab("logos")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "logos"
+                ? "bg-white text-blue-700 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <ImageIcon size={16} />
+            <span>Logos & En-tête</span>
+          </button>
+          <button
+            type="button"
+            id="tab-style-settings"
+            onClick={() => setActiveTab("styles")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "styles"
+                ? "bg-white text-blue-700 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Palette size={16} />
+            <span>Style des factures</span>
+          </button>
+          <button
+            type="button"
             id="tab-system-settings"
             onClick={() => setActiveTab("system")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -94,7 +124,13 @@ export const ParametresPage: React.FC = () => {
 
       {activeTab === "company" ? (
         /* Company Settings Form */
-        <CompanySettingsForm />
+        <CompanySettingsForm onGoToLogos={() => setActiveTab("logos")} />
+      ) : activeTab === "logos" ? (
+        /* Logo Manager Tab */
+        <LogoManager />
+      ) : activeTab === "styles" ? (
+        /* Invoice Style Manager Tab */
+        <InvoiceStyleManager />
       ) : (
         /* System & Diagnostics Tab */
         <div className="space-y-6">

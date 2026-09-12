@@ -18,13 +18,21 @@ import {
   ChevronUp,
   User,
   ShieldAlert,
+  Image as ImageIcon,
+  ArrowRight,
 } from "lucide-react";
 import { companySettingsSchema, CompanySettingsFormData } from "../../schemas/companySchema";
 import { useCompanySettings } from "../../hooks/useCompanySettings";
+import { useLogos } from "../../hooks/useLogos";
 
-export const CompanySettingsForm: React.FC = () => {
+interface CompanySettingsFormProps {
+  onGoToLogos?: () => void;
+}
+
+export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoToLogos }) => {
   const { settings, isLoading, isSaving, error, successMessage, saveSettings, clearMessages } =
     useCompanySettings();
+  const { defaultLogo } = useLogos();
 
   // Accordion state for advanced / optional sections to keep the UI clean and uncluttered
   const [showLegalSection, setShowLegalSection] = useState(false);
@@ -663,6 +671,43 @@ export const CompanySettingsForm: React.FC = () => {
               <option value="en">Anglais (English)</option>
             </select>
           </div>
+        </div>
+
+        {/* LOGO SELECTION SUMMARY CARD */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div className="flex items-center gap-3">
+            {defaultLogo ? (
+              <div className="w-12 h-12 rounded-lg bg-white p-1 border border-slate-200 flex items-center justify-center shrink-0">
+                <img src={defaultLogo.file_data} alt={defaultLogo.name} className="max-h-10 max-w-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+                <ImageIcon size={22} />
+              </div>
+            )}
+            <div>
+              <div className="text-xs font-bold text-slate-900">
+                {defaultLogo ? `Logo d'en-tête : ${defaultLogo.name}` : "Aucun logo d'en-tête configuré"}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {defaultLogo
+                  ? "Ce logo apparaîtra automatiquement sur vos devis et factures."
+                  : "Ajoutez un logo pour personnaliser vos devis et factures."}
+              </p>
+            </div>
+          </div>
+
+          {onGoToLogos && (
+            <button
+              type="button"
+              id="btn-manage-logos-shortcut"
+              onClick={onGoToLogos}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              <span>{defaultLogo ? "Gérer mes logos" : "Ajouter un logo"}</span>
+              <ArrowRight size={14} />
+            </button>
+          )}
         </div>
       </div>
 

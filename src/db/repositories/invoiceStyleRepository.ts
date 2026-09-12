@@ -1,0 +1,272 @@
+import { getDatabaseAsync } from "../client";
+import { InvoiceStyle, InvoiceStyleUpdateInput, InvoiceStyleCreateInput } from "../../types/invoiceStyle";
+
+interface RawInvoiceStyleRow {
+  id: number;
+  style_key: string;
+  name: string;
+  description: string | null;
+  logo_id: number | null;
+  primary_color: string;
+  header_color: string;
+  accent_color: string;
+  footer_color: string;
+  footer_text: string;
+  show_ice: number;
+  show_tax_id: number;
+  show_rc: number;
+  show_cnss: number;
+  show_iban: number;
+  show_phone: number;
+  show_email: number;
+  show_address: number;
+  is_default: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapRowToStyle(row: RawInvoiceStyleRow): InvoiceStyle {
+  return {
+    ...row,
+    description: row.description || undefined,
+    show_ice: Boolean(row.show_ice),
+    show_tax_id: Boolean(row.show_tax_id),
+    show_rc: Boolean(row.show_rc),
+    show_cnss: Boolean(row.show_cnss),
+    show_iban: Boolean(row.show_iban),
+    show_phone: Boolean(row.show_phone),
+    show_email: Boolean(row.show_email),
+    show_address: Boolean(row.show_address),
+    is_default: Boolean(row.is_default),
+  };
+}
+
+export const invoiceStyleRepository = {
+  /**
+   * Retrieves all available invoice presentation styles.
+   */
+  async getAllStyles(): Promise<InvoiceStyle[]> {
+    const db = await getDatabaseAsync();
+    const rows = await db.select<RawInvoiceStyleRow>(
+      "SELECT * FROM invoice_styles ORDER BY id ASC"
+    );
+    return rows.map(mapRowToStyle);
+  },
+
+  /**
+   * Retrieves a specific style by ID.
+   */
+  async getStyleById(id: number): Promise<InvoiceStyle | null> {
+    const db = await getDatabaseAsync();
+    const rows = await db.select<RawInvoiceStyleRow>(
+      "SELECT * FROM invoice_styles WHERE id = ? LIMIT 1",
+      [id]
+    );
+    return rows.length > 0 ? mapRowToStyle(rows[0]) : null;
+  },
+
+  /**
+   * Retrieves a style by its unique key (e.g. 'style_1', 'style_2', 'style_3').
+   */
+  async getStyleByKey(key: string): Promise<InvoiceStyle | null> {
+    const db = await getDatabaseAsync();
+    const rows = await db.select<RawInvoiceStyleRow>(
+      "SELECT * FROM invoice_styles WHERE style_key = ? LIMIT 1",
+      [key]
+    );
+    return rows.length > 0 ? mapRowToStyle(rows[0]) : null;
+  },
+
+  /**
+   * Retrieves the currently set default style.
+   */
+  async getDefaultStyle(): Promise<InvoiceStyle | null> {
+    const db = await getDatabaseAsync();
+    const rows = await db.select<RawInvoiceStyleRow>(
+      "SELECT * FROM invoice_styles WHERE is_default = 1 LIMIT 1"
+    );
+    if (rows.length > 0) {
+      return mapRowToStyle(rows[0]);
+    }
+
+    // Fallback: Return first available style if no default is flagged
+    const fallbackRows = await db.select<RawInvoiceStyleRow>(
+      "SELECT * FROM invoice_styles ORDER BY id ASC LIMIT 1"
+    );
+    return fallbackRows.length > 0 ? mapRowToStyle(fallbackRows[0]) : null;
+  },
+
+  /**
+   * Updates an existing invoice style configuration.
+   */
+  async updateStyle(id: number, input: InvoiceStyleUpdateInput): Promise<InvoiceStyle> {
+    const db = await getDatabaseAsync();
+    const existing = await this.getStyleById(id);
+
+    if (!existing) {
+      throw new Error("Le style spécifié est introuvable.");
+    }
+
+    const updatedName = input.name !== undefined ? input.name.trim() : existing.name;
+    const updatedDescription = input.description !== undefined ? input.description : existing.description;
+    const updatedLogoId = input.logo_id !== undefined ? input.logo_id : existing.logo_id;
+    const updatedPrimary = input.primary_color || existing.primary_color;
+    const updatedHeader = input.header_color || existing.header_color;
+    const updatedAccent = input.accent_color || existing.accent_color;
+    const updatedFooterColor = input.footer_color || existing.footer_color;
+    const updatedFooterText = input.footer_text !== undefined ? input.footer_text : existing.footer_text;
+
+    const showIce = input.show_ice !== undefined ? (input.show_ice ? 1 : 0) : (existing.show_ice ? 1 : 0);
+    const showTaxId = input.show_tax_id !== undefined ? (input.show_tax_id ? 1 : 0) : (existing.show_tax_id ? 1 : 0);
+    const showRc = input.show_rc !== undefined ? (input.show_rc ? 1 : 0) : (existing.show_rc ? 1 : 0);
+    const showCnss = input.show_cnss !== undefined ? (input.show_cnss ? 1 : 0) : (existing.show_cnss ? 1 : 0);
+    const showIban = input.show_iban !== undefined ? (input.show_iban ? 1 : 0) : (existing.show_iban ? 1 : 0);
+    const showPhone = input.show_phone !== undefined ? (input.show_phone ? 1 : 0) : (existing.show_phone ? 1 : 0);
+    const showEmail = input.show_email !== undefined ? (input.show_email ? 1 : 0) : (existing.show_email ? 1 : 0);
+    const showAddress = input.show_address !== undefined ? (input.show_address ? 1 : 0) : (existing.show_address ? 1 : 0);
+
+    await db.execute(
+      `
+      UPDATE invoice_styles SET
+        name = ?,
+        description = ?,
+        logo_id = ?,
+        primary_color = ?,
+        header_color = ?,
+        accent_color = ?,
+        footer_color = ?,
+        footer_text = ?,
+        show_ice = ?,
+        show_tax_id = ?,
+        show_rc = ?,
+        show_cnss = ?,
+        show_iban = ?,
+        show_phone = ?,
+        show_email = ?,
+        show_address = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+      `,
+      [
+        updatedName,
+        updatedDescription || null,
+        updatedLogoId,
+        updatedPrimary,
+        updatedHeader,
+        updatedAccent,
+        updatedFooterColor,
+        updatedFooterText,
+        showIce,
+        showTaxId,
+        showRc,
+        showCnss,
+        showIban,
+        showPhone,
+        showEmail,
+        showAddress,
+        id,
+      ]
+    );
+
+    if (input.is_default) {
+      await this.setDefaultStyle(id);
+    }
+
+    const updated = await this.getStyleById(id);
+    return updated!;
+  },
+
+  /**
+   * Sets a specific style as default in a transaction.
+   */
+  async setDefaultStyle(id: number): Promise<boolean> {
+    const db = await getDatabaseAsync();
+    const target = await this.getStyleById(id);
+
+    if (!target) {
+      throw new Error("Le style à définir par défaut est introuvable.");
+    }
+
+    await db.execute("BEGIN TRANSACTION;");
+
+    try {
+      await db.execute("UPDATE invoice_styles SET is_default = 0");
+      await db.execute(
+        "UPDATE invoice_styles SET is_default = 1, updated_at = datetime('now') WHERE id = ?",
+        [id]
+      );
+      await db.execute("COMMIT;");
+      return true;
+    } catch (err) {
+      try {
+        await db.execute("ROLLBACK;");
+      } catch (rollbackErr) {
+        console.error("[invoiceStyleRepository] Rollback error:", rollbackErr);
+      }
+      throw err;
+    }
+  },
+
+  /**
+   * Creates a new style entry (makes it straightforward to add Style 3 or custom styles).
+   */
+  async createStyle(input: InvoiceStyleCreateInput): Promise<InvoiceStyle> {
+    const db = await getDatabaseAsync();
+
+    const insertResult = await db.execute(
+      `
+      INSERT INTO invoice_styles (
+        style_key,
+        name,
+        description,
+        logo_id,
+        primary_color,
+        header_color,
+        accent_color,
+        footer_color,
+        footer_text,
+        show_ice,
+        show_tax_id,
+        show_rc,
+        show_cnss,
+        show_iban,
+        show_phone,
+        show_email,
+        show_address,
+        is_default,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `,
+      [
+        input.style_key,
+        input.name,
+        input.description || null,
+        input.logo_id || null,
+        input.primary_color || "#1e3a8a",
+        input.header_color || "#f8fafc",
+        input.accent_color || "#2563eb",
+        input.footer_color || "#f1f5f9",
+        input.footer_text || "Merci de votre confiance.",
+        input.show_ice !== false ? 1 : 0,
+        input.show_tax_id !== false ? 1 : 0,
+        input.show_rc !== false ? 1 : 0,
+        input.show_cnss ? 1 : 0,
+        input.show_iban !== false ? 1 : 0,
+        input.show_phone !== false ? 1 : 0,
+        input.show_email !== false ? 1 : 0,
+        input.show_address !== false ? 1 : 0,
+        input.is_default ? 1 : 0,
+      ]
+    );
+
+    const createdId = insertResult.lastInsertId!;
+
+    if (input.is_default) {
+      await this.setDefaultStyle(createdId);
+    }
+
+    const created = await this.getStyleById(createdId);
+    return created!;
+  },
+};

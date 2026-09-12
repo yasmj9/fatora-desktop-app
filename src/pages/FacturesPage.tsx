@@ -10,9 +10,13 @@ import {
   User,
   CreditCard,
   ShieldCheck,
+  Eye,
+  AlertTriangle,
+  X,
+  Calendar,
 } from "lucide-react";
 import { Client } from "../types/client";
-import { DocumentLanguage, PaymentMethod, Invoice } from "../types/invoice";
+import { DocumentLanguage, PaymentMethod, Invoice, InvoiceStatus } from "../types/invoice";
 import { DraftInvoiceItem, DraftPaymentState } from "../types/draftInvoice";
 import { useInvoices } from "../hooks/useInvoices";
 import { useCompanySettings } from "../hooks/useCompanySettings";
@@ -22,6 +26,10 @@ import { InvoiceItemsSection } from "../components/invoices/InvoiceItemsSection"
 import { InvoicePaymentSection } from "../components/invoices/InvoicePaymentSection";
 import { InvoiceVerificationSection } from "../components/invoices/InvoiceVerificationSection";
 import { InvoiceSuccessScreen } from "../components/invoices/InvoiceSuccessScreen";
+import { InvoiceStatusBadge } from "../components/invoices/InvoiceStatusBadge";
+import { InvoiceDetailView } from "../components/invoices/InvoiceDetailView";
+import { AddPaymentModal } from "../components/invoices/AddPaymentModal";
+import { CancelInvoiceDialog } from "../components/invoices/CancelInvoiceDialog";
 import {
   formatMoney,
   calculateInvoiceFinancials,
@@ -39,13 +47,44 @@ const INITIAL_PAYMENT_STATE: DraftPaymentState = {
   notes: "",
 };
 
+const STATUS_FILTERS: { id: "all" | InvoiceStatus; label: string }[] = [
+  { id: "all", label: "Toutes" },
+  { id: "sent", label: "Non payées" },
+  { id: "partially_paid", label: "Partiellement payées" },
+  { id: "paid", label: "Payées" },
+  { id: "draft", label: "Brouillons" },
+  { id: "cancelled", label: "Annulées" },
+];
+
 export const FacturesPage: React.FC = () => {
-  const { invoices, isLoading, searchQuery, setSearchQuery, createInvoice } =
-    useInvoices("all");
+  const {
+    invoices,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    createInvoice,
+    addPayment,
+    updateStatus,
+    actionSuccess,
+    error,
+    clearMessages,
+    loadInvoices,
+  } = useInvoices("all");
+
   const { settings } = useCompanySettings();
 
-  const [viewMode, setViewMode] = useState<"list" | "create">("list");
+  const [viewMode, setViewMode] = useState<"list" | "create" | "detail">("list");
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+
+  // Modals state
+  const [paymentModalInvoice, setPaymentModalInvoice] = useState<Invoice | null>(null);
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState<boolean>(false);
+
+  const [cancelDialogInvoice, setCancelDialogInvoice] = useState<Invoice | null>(null);
+  const [isCancellingInvoice, setIsCancellingInvoice] = useState<boolean>(false);
 
   // Invoice creation draft state
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -105,6 +144,16 @@ export const FacturesPage: React.FC = () => {
     setViewMode("list");
   };
 
+  const handleOpenDetail = (id: number) => {
+    setSelectedInvoiceId(id);
+    setViewMode("detail");
+  };
+
+  const handleBackToList = () => {
+    setSelectedInvoiceId(null);
+    setViewMode("list");
+  };
+
   const handleClientSelected = (client: Client | null) => {
     setSelectedClient(client);
     if (client) {
@@ -112,7 +161,7 @@ export const FacturesPage: React.FC = () => {
     }
   };
 
-  // Financial totals calculation
+  // Financial totals calculation for draft
   const totals = calculateInvoiceFinancials({
     items: draftItems.map((it) => ({
       quantity: it.quantity,
@@ -130,7 +179,7 @@ export const FacturesPage: React.FC = () => {
     draftPayment.paid_amount_cents
   );
 
-  // Save the invoice to SQLite via transaction
+  // Save the draft invoice to SQLite via transaction
   const handleSaveInvoice = async () => {
     if (!selectedClient) {
       setSaveError("Veuillez sélectionner un client.");
@@ -206,12 +255,85 @@ export const FacturesPage: React.FC = () => {
     }
   };
 
+  // Submit payment from modal
+  const handlePaymentSubmit = async (data: {
+    invoice_id: number;
+    amount_cents: number;
+    payment_method: PaymentMethod;
+    payment_date: string;
+    reference?: string;
+    notes?: string;
+  }) => {
+    setIsSubmittingPayment(true);
+    try {
+      const success = await addPayment(data);
+      if (success) {
+        setPaymentModalInvoice(null);
+      }
+    } finally {
+      setIsSubmittingPayment(false);
+    }
+  };
+
+  // Confirm invoice cancellation
+  const handleConfirmCancel = async () => {
+    if (!cancelDialogInvoice) return;
+    setIsCancellingInvoice(true);
+    try {
+      await updateStatus(cancelDialogInvoice.id, "cancelled");
+      setCancelDialogInvoice(null);
+    } finally {
+      setIsCancellingInvoice(false);
+    }
+  };
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {viewMode === "create" ? (
-        /* ================= INVOICE CREATION WORKFLOW ================= */
+    <div className="max-w-6xl mx-auto space-y-6">
+      {/* Global Notifications */}
+      {actionSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl flex items-center justify-between text-sm animate-in fade-in">
+          <div className="flex items-center gap-2 font-medium">
+            <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+            <span>{actionSuccess}</span>
+          </div>
+          <button
+            type="button"
+            onClick={clearMessages}
+            className="text-emerald-700 hover:text-emerald-900 p-1 rounded-lg"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl flex items-center justify-between text-sm animate-in fade-in">
+          <div className="flex items-center gap-2 font-medium">
+            <AlertTriangle size={18} className="text-rose-600 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={clearMessages}
+            className="text-rose-700 hover:text-rose-900 p-1 rounded-lg"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* VIEW 1: INVOICE DETAIL VIEW */}
+      {viewMode === "detail" && selectedInvoiceId ? (
+        <InvoiceDetailView
+          invoiceId={selectedInvoiceId}
+          onBack={handleBackToList}
+          onOpenAddPayment={(inv) => setPaymentModalInvoice(inv)}
+          onOpenCancelDialog={(inv) => setCancelDialogInvoice(inv)}
+          onRefreshList={loadInvoices}
+        />
+      ) : viewMode === "create" ? (
+        /* VIEW 2: INVOICE CREATION WORKFLOW */
         <div className="space-y-6">
-          {/* If invoice has been successfully created, show Success Screen */}
           {createdInvoice ? (
             <InvoiceSuccessScreen
               invoice={createdInvoice}
@@ -220,7 +342,7 @@ export const FacturesPage: React.FC = () => {
             />
           ) : (
             <>
-              {/* Top navigation & Step Progress Bar */}
+              {/* Stepper Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
                 <button
                   type="button"
@@ -232,9 +354,8 @@ export const FacturesPage: React.FC = () => {
                   <span>Retour aux factures</span>
                 </button>
 
-                {/* Stepper navigation buttons */}
+                {/* Step Indicators */}
                 <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold overflow-x-auto py-1">
-                  {/* Step 1: Client */}
                   <button
                     type="button"
                     id="stepper-step-1"
@@ -259,7 +380,6 @@ export const FacturesPage: React.FC = () => {
 
                   <span className="text-slate-300">›</span>
 
-                  {/* Step 2: Prestations */}
                   <button
                     type="button"
                     id="stepper-step-2"
@@ -294,7 +414,6 @@ export const FacturesPage: React.FC = () => {
 
                   <span className="text-slate-300">›</span>
 
-                  {/* Step 3: Règlement & Paiement */}
                   <button
                     type="button"
                     id="stepper-step-3"
@@ -321,7 +440,6 @@ export const FacturesPage: React.FC = () => {
 
                   <span className="text-slate-300">›</span>
 
-                  {/* Step 4: Vérification & Création */}
                   <button
                     type="button"
                     id="stepper-step-4"
@@ -343,7 +461,7 @@ export const FacturesPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Persistent Client Summary Banner when in Step 2, 3, or 4 */}
+              {/* Client banner during step 2, 3 */}
               {currentStep > 1 && currentStep < 4 && selectedClient && (
                 <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3">
@@ -367,20 +485,17 @@ export const FacturesPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 self-end sm:self-auto">
-                    <button
-                      type="button"
-                      id="btn-back-to-client-step"
-                      onClick={() => setCurrentStep(1)}
-                      className="text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-white hover:bg-emerald-100/60 px-3 py-1.5 rounded-xl border border-emerald-300 transition-colors cursor-pointer"
-                    >
-                      Changer de client
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-white hover:bg-emerald-100/60 px-3 py-1.5 rounded-xl border border-emerald-300 transition-colors cursor-pointer self-start sm:self-auto"
+                  >
+                    Changer de client
+                  </button>
                 </div>
               )}
 
-              {/* STEP 1: CLIENT SELECTION */}
+              {/* STEP 1: CLIENT */}
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <InvoiceClientSelector
@@ -416,7 +531,7 @@ export const FacturesPage: React.FC = () => {
                 </div>
               )}
 
-              {/* STEP 2: SERVICES / ITEMS SECTION */}
+              {/* STEP 2: PRESTATIONS */}
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <InvoiceItemsSection
@@ -427,7 +542,6 @@ export const FacturesPage: React.FC = () => {
                     currency={currency}
                   />
 
-                  {/* Navigation between steps */}
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <button
                       type="button"
@@ -464,7 +578,7 @@ export const FacturesPage: React.FC = () => {
                 </div>
               )}
 
-              {/* STEP 3: PAYMENT SECTION */}
+              {/* STEP 3: PAYMENT */}
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <InvoicePaymentSection
@@ -474,7 +588,6 @@ export const FacturesPage: React.FC = () => {
                     currency={currency}
                   />
 
-                  {/* Navigation between steps */}
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <button
                       type="button"
@@ -514,7 +627,7 @@ export const FacturesPage: React.FC = () => {
                 </div>
               )}
 
-              {/* STEP 4: VERIFICATION SUMMARY */}
+              {/* STEP 4: VERIFICATION */}
               {currentStep === 4 && selectedClient && (
                 <InvoiceVerificationSection
                   client={selectedClient}
@@ -533,110 +646,295 @@ export const FacturesPage: React.FC = () => {
           )}
         </div>
       ) : (
-        /* ================= INVOICE LIST VIEW ================= */
+        /* VIEW 3: MAIN INVOICE LIST */
         <div className="space-y-6">
-          {/* Top Action Bar */}
+          {/* Header & Main Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="search-factures"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher par client, numéro, montant..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
-              />
+            <div>
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Factures
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Gérez vos factures et règlements locaux.
+              </p>
             </div>
 
             <button
               id="btn-nouvelle-facture"
               type="button"
               onClick={handleStartCreate}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[44px]"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[44px]"
             >
               <Plus size={18} />
               <span>+ Nouvelle facture</span>
             </button>
           </div>
 
-          {/* Invoice List or Empty State */}
-          {isLoading ? (
-            <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-xs">
-              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-500 font-medium">Chargement des factures...</p>
-            </div>
-          ) : invoices.length > 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs divide-y divide-slate-100">
-              {invoices.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          {/* Search Bar & Status Filter Tabs */}
+          <div className="space-y-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            {/* Search Input */}
+            <div className="relative">
+              <Search
+                size={18}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+              <input
+                id="search-factures"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher par numéro (FAC-2026...), client, téléphone ou ICE..."
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <FileText size={22} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-slate-900 text-sm">
-                          {inv.invoice_number}
-                        </span>
-                        <span
-                          className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                            inv.status === "paid"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : inv.status === "partially_paid"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-slate-200 text-slate-700"
-                          }`}
-                        >
-                          {inv.status === "paid"
-                            ? "Payée"
-                            : inv.status === "partially_paid"
-                            ? "Partielle"
-                            : "Non payée"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1">
-                        Client : <strong className="text-slate-900">{inv.client_name}</strong>
-                      </p>
-                    </div>
-                  </div>
+                  <X size={15} />
+                </button>
+              )}
+            </div>
 
-                  <div className="text-left sm:text-right">
-                    <div className="text-sm font-extrabold font-mono text-slate-900">
-                      {formatMoney(inv.total_cents, inv.currency || "MAD", true)}
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      Date : {inv.invoice_date}
-                    </p>
-                  </div>
-                </div>
+            {/* Status Filter Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
+              {STATUS_FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  id={`filter-status-${f.id}`}
+                  onClick={() => setStatusFilter(f.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    statusFilter === f.id
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
+                  }`}
+                >
+                  {f.label}
+                </button>
               ))}
             </div>
+          </div>
+
+          {/* Main Invoices Table */}
+          {isLoading ? (
+            <div className="p-16 text-center bg-white rounded-2xl border border-slate-200 shadow-2xs">
+              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs text-slate-500 font-medium">
+                Chargement des factures...
+              </p>
+            </div>
+          ) : invoices.length > 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      <th className="py-3.5 px-4 sm:px-6">Numéro</th>
+                      <th className="py-3.5 px-4 sm:px-6">Client</th>
+                      <th className="py-3.5 px-4 sm:px-6">Date</th>
+                      <th className="py-3.5 px-4 sm:px-6 text-right">Total</th>
+                      <th className="py-3.5 px-4 sm:px-6 text-center">Statut</th>
+                      <th className="py-3.5 px-4 sm:px-6 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {invoices.map((inv) => {
+                      const canAddPayment =
+                        inv.status !== "cancelled" &&
+                        inv.status !== "paid" &&
+                        (inv.balance_cents ?? inv.total_cents) > 0;
+                      const canCancel = inv.status !== "cancelled";
+
+                      return (
+                        <tr
+                          key={inv.id}
+                          className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                          onClick={() => handleOpenDetail(inv.id)}
+                        >
+                          {/* Numéro */}
+                          <td className="py-4 px-4 sm:px-6 font-mono font-bold text-slate-900 text-sm whitespace-nowrap">
+                            <span className="text-blue-600 group-hover:underline">
+                              {inv.invoice_number}
+                            </span>
+                          </td>
+
+                          {/* Client */}
+                          <td className="py-4 px-4 sm:px-6">
+                            <div className="font-bold text-slate-900 text-sm">
+                              {inv.client_name}
+                            </div>
+                            <div className="text-slate-400 text-[11px] flex items-center gap-1.5 mt-0.5">
+                              <span>
+                                {inv.client_type === "company" ? "Entreprise" : "Particulier"}
+                              </span>
+                              {inv.client_phone && (
+                                <>
+                                  <span>·</span>
+                                  <span>{inv.client_phone}</span>
+                                </>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Date */}
+                          <td className="py-4 px-4 sm:px-6 text-slate-600 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 font-medium">
+                              <Calendar size={13} className="text-slate-400" />
+                              <span>{inv.invoice_date}</span>
+                            </div>
+                          </td>
+
+                          {/* Total */}
+                          <td className="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
+                            <div className="font-mono font-extrabold text-slate-900 text-sm">
+                              {formatMoney(inv.total_cents, inv.currency || "MAD", true)}
+                            </div>
+                            {inv.status === "partially_paid" && (
+                              <div className="text-[11px] font-mono text-amber-700 font-semibold mt-0.5">
+                                Reste: {formatMoney(inv.balance_cents ?? inv.total_cents, inv.currency || "MAD", true)}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Statut */}
+                          <td className="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
+                            <InvoiceStatusBadge status={inv.status} size="sm" />
+                          </td>
+
+                          {/* Action */}
+                          <td
+                            className="py-4 px-4 sm:px-6 text-right whitespace-nowrap"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {/* Voir Button */}
+                              <button
+                                type="button"
+                                id={`btn-view-invoice-${inv.id}`}
+                                onClick={() => handleOpenDetail(inv.id)}
+                                title="Voir les détails de la facture"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                              >
+                                <Eye size={13} className="text-slate-500" />
+                                <span>Voir</span>
+                              </button>
+
+                              {/* Ajouter un paiement Button */}
+                              {canAddPayment && (
+                                <button
+                                  type="button"
+                                  id={`btn-pay-invoice-${inv.id}`}
+                                  onClick={() => setPaymentModalInvoice(inv)}
+                                  title="Ajouter un règlement"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                                >
+                                  <Plus size={13} className="text-emerald-600" />
+                                  <span>Paiement</span>
+                                </button>
+                              )}
+
+                              {/* Annuler Button */}
+                              {canCancel && (
+                                <button
+                                  type="button"
+                                  id={`btn-cancel-invoice-${inv.id}`}
+                                  onClick={() => setCancelDialogInvoice(inv)}
+                                  title="Annuler cette facture"
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                >
+                                  <AlertTriangle size={15} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Table Footer Stats */}
+              <div className="bg-slate-50/80 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <span>
+                  {invoices.length} facture{invoices.length > 1 ? "s" : ""} trouvée{invoices.length > 1 ? "s" : ""}
+                </span>
+                {statusFilter !== "all" && (
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter("all")}
+                    className="text-blue-600 hover:underline font-medium cursor-pointer"
+                  >
+                    Afficher toutes les factures
+                  </button>
+                )}
+              </div>
+            </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs flex flex-col items-center justify-center min-h-[360px]">
+            /* Empty State */
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-2xs flex flex-col items-center justify-center min-h-[360px]">
               <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
                 <FileText size={32} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
-                Aucune facture pour le moment
+              <h3 className="text-lg font-bold text-slate-900 mb-1">
+                {searchQuery || statusFilter !== "all"
+                  ? "Aucune facture ne correspond à votre recherche"
+                  : "Aucune facture pour le moment"}
               </h3>
-              <p className="text-slate-500 text-sm max-w-md mb-6 leading-relaxed">
-                Créez vos factures en quelques clics pour vos clients et gardez un historique clair 100% hors-ligne.
+              <p className="text-slate-500 text-xs max-w-md mb-6 leading-relaxed">
+                {searchQuery || statusFilter !== "all"
+                  ? "Essayez de modifier vos filtres de statut ou le texte de recherche."
+                  : "Créez vos factures en quelques clics pour vos clients et gardez un historique clair 100% hors-ligne."}
               </p>
-              <button
-                id="btn-create-first-facture"
-                type="button"
-                onClick={handleStartCreate}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer min-h-[44px] shadow-sm hover:shadow-md"
-              >
-                Créer ma première facture
-              </button>
+
+              {searchQuery || statusFilter !== "all" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("all");
+                  }}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  Réinitialiser les filtres
+                </button>
+              ) : (
+                <button
+                  id="btn-create-first-facture"
+                  type="button"
+                  onClick={handleStartCreate}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer min-h-[44px] shadow-sm hover:shadow-md"
+                >
+                  Créer ma première facture
+                </button>
+              )}
             </div>
           )}
         </div>
+      )}
+
+      {/* Add Payment Modal */}
+      {paymentModalInvoice && (
+        <AddPaymentModal
+          invoice={paymentModalInvoice}
+          isOpen={!!paymentModalInvoice}
+          isSubmitting={isSubmittingPayment}
+          onClose={() => setPaymentModalInvoice(null)}
+          onSubmit={handlePaymentSubmit}
+        />
+      )}
+
+      {/* Cancel Invoice Confirmation Dialog */}
+      {cancelDialogInvoice && (
+        <CancelInvoiceDialog
+          invoice={cancelDialogInvoice}
+          isOpen={!!cancelDialogInvoice}
+          isCancelling={isCancellingInvoice}
+          onClose={() => setCancelDialogInvoice(null)}
+          onConfirmCancel={handleConfirmCancel}
+        />
       )}
     </div>
   );
