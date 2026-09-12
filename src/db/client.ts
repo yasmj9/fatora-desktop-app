@@ -317,48 +317,14 @@ class WebLocalSqliteClient implements DbClient {
     const insertMatch = trimmed.match(/INSERT(?:\s+OR\s+\w+)?\s+INTO\s+([a-zA-Z0-9_]+)\s*\(([^)]+)\)\s*VALUES/i);
     if (insertMatch) {
       const tableName = insertMatch[1].toLowerCase();
-      const colNames = insertMatch[2].split(",").map((c) => c.trim().replace(/^["'`]|["'`]$/g, ""));
-      const rowObj: Record<string, unknown> = {};
-      colNames.forEach((col, idx) => {
-        rowObj[col] = bindValues[idx];
-      });
-
-      if (tableName === "quotation_items") {
-        this.quotationItems.push(rowObj);
-        this.saveQuotationItemsToStorage();
-      } else if (tableName === "quotations") {
-        this.quotations.push(rowObj);
-        this.saveQuotationsToStorage();
-      } else if (tableName === "payments") {
-        this.payments.push(rowObj);
-        this.savePaymentsToStorage();
-      } else if (tableName === "invoice_items") {
-        this.invoiceItems.push(rowObj);
-        this.saveInvoiceItemsToStorage();
-      } else if (tableName === "invoices") {
-        this.invoices.push(rowObj);
-        this.saveInvoicesToStorage();
-      } else if (tableName === "clients") {
-        this.clients.push(rowObj);
-        this.saveClientsToStorage();
-      } else if (tableName === "services") {
-        this.services.push(rowObj);
-        this.saveServicesToStorage();
-      } else if (tableName === "logos") {
-        this.logos.push(rowObj);
-        this.saveLogosToStorage();
-      } else if (tableName === "invoice_styles") {
-        this.invoiceStyles.push(rowObj);
-        this.saveInvoiceStylesToStorage();
-      } else if (tableName === "company_settings") {
-        this.companySettings = { ...this.companySettings, ...rowObj };
-        try { localStorage.setItem("fatora_company_settings", JSON.stringify(this.companySettings)); } catch {}
-      } else if (tableName === "app_metadata") {
-        if (rowObj.key && rowObj.value) {
-          this.metadata.set(String(rowObj.key), String(rowObj.value));
-        }
+      if (!["clients", "services", "invoices", "quotations", "invoice_items", "quotation_items", "payments", "logos", "invoice_styles", "company_settings", "app_metadata"].includes(tableName)) {
+        const colNames = insertMatch[2].split(",").map((c) => c.trim().replace(/^["'`]|["'`]$/g, ""));
+        const rowObj: Record<string, unknown> = {};
+        colNames.forEach((col, idx) => {
+          rowObj[col] = bindValues[idx];
+        });
+        return { rowsAffected: 1, lastInsertId: Number(rowObj.id) || 1 };
       }
-      return { rowsAffected: 1, lastInsertId: Number(rowObj.id) || 1 };
     }
 
     if (trimmed.includes("INSERT INTO _schema_migrations") || trimmed.includes("INSERT OR IGNORE INTO _schema_migrations")) {
