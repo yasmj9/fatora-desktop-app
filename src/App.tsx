@@ -1,54 +1,42 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { NavPageId } from "./types/navigation";
+import { AppLayout } from "./components/layout/AppLayout";
+import { DatabaseProvider } from "./context/DatabaseContext";
+import { AccueilPage } from "./pages/AccueilPage";
+import { FacturesPage } from "./pages/FacturesPage";
+import { DevisPage } from "./pages/DevisPage";
+import { ClientsPage } from "./pages/ClientsPage";
+import { ServicesPage } from "./pages/ServicesPage";
+import { ParametresPage } from "./pages/ParametresPage";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+export function App() {
+  const [currentPage, setCurrentPage] = useState<NavPageId>("accueil");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    try {
-      setGreetMsg(await invoke("greet", { name }));
-    } catch {
-      setGreetMsg(`Hello, ${name}! You've been greeted from Rust!`);
+  const renderContent = () => {
+    switch (currentPage) {
+      case "accueil":
+        return <AccueilPage onNavigate={setCurrentPage} />;
+      case "factures":
+        return <FacturesPage />;
+      case "devis":
+        return <DevisPage />;
+      case "clients":
+        return <ClientsPage />;
+      case "services":
+        return <ServicesPage />;
+      case "parametres":
+        return <ParametresPage />;
+      default:
+        return <AccueilPage onNavigate={setCurrentPage} />;
     }
-  }
+  };
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <DatabaseProvider>
+      <AppLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {renderContent()}
+      </AppLayout>
+    </DatabaseProvider>
   );
 }
 
