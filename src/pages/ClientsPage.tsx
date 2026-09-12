@@ -7,6 +7,7 @@ import {
   CheckCircle,
   AlertCircle,
   Archive,
+  Trash2,
 } from "lucide-react";
 import { Client, ClientCreateInput } from "../types/client";
 import { useClients } from "../hooks/useClients";
@@ -28,6 +29,7 @@ export const ClientsPage: React.FC = () => {
     updateClient,
     archiveClient,
     restoreClient,
+    deleteClient,
     clearMessages,
   } = useClients("active");
 
@@ -37,8 +39,9 @@ export const ClientsPage: React.FC = () => {
   const [detailsClient, setDetailsClient] = useState<Client | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
 
-  // Archive confirmation modal state
+  // Archive and delete confirmation modal states
   const [clientToArchive, setClientToArchive] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
   const handleOpenCreate = () => {
     setClientToEdit(null);
@@ -67,6 +70,12 @@ export const ClientsPage: React.FC = () => {
     if (!clientToArchive) return;
     await archiveClient(clientToArchive.id, clientToArchive.name);
     setClientToArchive(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!clientToDelete) return;
+    await deleteClient(clientToDelete.id, clientToDelete.name);
+    setClientToDelete(null);
   };
 
   const handleRestore = async (client: Client) => {
@@ -219,6 +228,7 @@ export const ClientsPage: React.FC = () => {
           onViewDetails={handleOpenDetails}
           onArchive={(client) => setClientToArchive(client)}
           onRestore={handleRestore}
+          onDelete={(client) => setClientToDelete(client)}
         />
       ) : (
         /* Empty States */
@@ -290,6 +300,7 @@ export const ClientsPage: React.FC = () => {
         onEdit={handleOpenEdit}
         onArchive={(client) => setClientToArchive(client)}
         onRestore={handleRestore}
+        onDelete={(client) => setClientToDelete(client)}
       />
 
       {/* Confirmation Modal for Archiving */}
@@ -323,6 +334,45 @@ export const ClientsPage: React.FC = () => {
                 className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-xl transition-colors cursor-pointer"
               >
                 Confirmer l'archivage
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Permanent Deletion */}
+      {clientToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Trash2 size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Supprimer définitivement le client ?
+              </h3>
+              <p className="text-sm text-slate-600 mt-1">
+                Voulez-vous vraiment supprimer le client <span className="font-semibold text-slate-900">"{clientToDelete.name}"</span> ?
+              </p>
+              <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-medium">
+                ⚠️ Attention : Cette action est irréversible et supprimera également <strong>toutes les factures et tous les devis</strong> associés à ce client.
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setClientToDelete(null)}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                id="btn-confirm-delete-client"
+                onClick={handleConfirmDelete}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-colors cursor-pointer shadow-sm"
+              >
+                Oui, tout supprimer
               </button>
             </div>
           </div>

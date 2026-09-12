@@ -13,6 +13,55 @@ export const pdfService = {
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
+      onclone: (clonedDoc) => {
+        // Sanitize oklch colors in inline styles
+        const allElements = clonedDoc.querySelectorAll("*");
+        allElements.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          if (htmlEl.style) {
+            for (let i = 0; i < htmlEl.style.length; i++) {
+              const prop = htmlEl.style[i];
+              const val = htmlEl.style.getPropertyValue(prop);
+              if (val && val.includes("oklch")) {
+                htmlEl.style.setProperty(prop, "#3b82f6");
+              }
+            }
+          }
+        });
+
+        // Sanitize oklch colors in style tags and stylesheets
+        const styleTags = clonedDoc.querySelectorAll("style");
+        styleTags.forEach((tag) => {
+          if (tag.textContent && tag.textContent.includes("oklch")) {
+            tag.textContent = tag.textContent.replace(/oklch\([^)]+\)/g, "#3b82f6");
+          }
+        });
+
+        try {
+          const styleSheets = clonedDoc.styleSheets;
+          for (let i = 0; i < styleSheets.length; i++) {
+            try {
+              const rules = styleSheets[i].cssRules;
+              for (let j = 0; j < rules.length; j++) {
+                const rule = rules[j] as CSSStyleRule;
+                if (rule.style) {
+                  for (let k = 0; k < rule.style.length; k++) {
+                    const prop = rule.style[k];
+                    const val = rule.style.getPropertyValue(prop);
+                    if (val && val.includes("oklch")) {
+                      rule.style.setProperty(prop, "#3b82f6");
+                    }
+                  }
+                }
+              }
+            } catch {
+              // Ignore cross-origin stylesheet access errors
+            }
+          }
+        } catch {
+          // Ignore
+        }
+      },
     });
 
     const imgData = canvas.toDataURL("image/png");

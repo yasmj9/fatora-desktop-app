@@ -12,6 +12,7 @@ import {
   FileText,
   Calendar,
   Building,
+  Trash2,
 } from "lucide-react";
 import { Client } from "../../types/client";
 
@@ -22,6 +23,7 @@ interface ClientDetailsModalProps {
   onEdit: (client: Client) => void;
   onArchive: (client: Client) => void;
   onRestore: (client: Client) => void;
+  onDelete: (client: Client) => void;
 }
 
 export const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({
@@ -31,6 +33,7 @@ export const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({
   onEdit,
   onArchive,
   onRestore,
+  onDelete,
 }) => {
   if (!isOpen || !client) return null;
 
@@ -214,18 +217,32 @@ export const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({
                 <span>Archiver ce client</span>
               </button>
             ) : (
-              <button
-                type="button"
-                id="btn-modal-restore-client"
-                onClick={() => {
-                  onRestore(client);
-                  onClose();
-                }}
-                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
-              >
-                <RotateCcw size={16} />
-                <span>Restaurer ce client</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="btn-modal-restore-client"
+                  onClick={() => {
+                    onRestore(client);
+                    onClose();
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                >
+                  <RotateCcw size={16} />
+                  <span>Restaurer</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-modal-delete-client"
+                  onClick={() => {
+                    onDelete(client);
+                    onClose();
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 px-3 py-2 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                >
+                  <Trash2 size={16} />
+                  <span>Supprimer définitivement</span>
+                </button>
+              </div>
             )}
           </div>
 

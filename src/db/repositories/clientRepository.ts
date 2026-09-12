@@ -246,4 +246,35 @@ export const clientRepository = {
       [id]
     );
   },
+
+  /**
+   * Deletes a client and all related invoices (and invoice items/payments) and quotations.
+   */
+  async deleteClientWithRelated(clientId: number): Promise<void> {
+    const db = await getDatabaseAsync();
+
+    // 1. Delete invoice items, payments, and invoices belonging to this client
+    const invoices = await db.select<{ id: number }>(
+      "SELECT id FROM invoices WHERE client_id = ?",
+      [clientId]
+    );
+    for (const inv of invoices) {
+      await db.execute("DELETE FROM invoice_items WHERE invoice_id = ?", [inv.id]);
+      await db.execute("DELETE FROM payments WHERE invoice_id = ?", [inv.id]);
+      await db.execute("DELETE FROM invoices WHERE id = ?", [inv.id]);
+    }
+
+    // 2. Delete quotation items and quotations belonging to this client
+    const quotations = await db.select<{ id: number }>(
+      "SELECT id FROM quotations WHERE client_id = ?",
+      [clientId]
+    );
+    for (const q of quotations) {
+      await db.execute("DELETE FROM quotation_items WHERE quotation_id = ?", [q.id]);
+      await db.execute("DELETE FROM quotations WHERE id = ?", [q.id]);
+    }
+
+    // 3. Delete the client record
+    await db.execute("DELETE FROM clients WHERE id = ?", [clientId]);
+  },
 };

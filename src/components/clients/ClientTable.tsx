@@ -9,6 +9,7 @@ import {
   Phone,
   MapPin,
   Building,
+  Trash2,
 } from "lucide-react";
 import { Client } from "../../types/client";
 
@@ -18,6 +19,7 @@ interface ClientTableProps {
   onViewDetails: (client: Client) => void;
   onArchive: (client: Client) => void;
   onRestore: (client: Client) => void;
+  onDelete: (client: Client) => void;
 }
 
 export const ClientTable: React.FC<ClientTableProps> = ({
@@ -26,6 +28,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({
   onViewDetails,
   onArchive,
   onRestore,
+  onDelete,
 }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
@@ -191,16 +194,28 @@ export const ClientTable: React.FC<ClientTableProps> = ({
                           <span>Archiver</span>
                         </button>
                       ) : (
-                        <button
-                          type="button"
-                          id={`btn-restore-client-${client.id}`}
-                          onClick={() => onRestore(client)}
-                          title="Restaurer ce client"
-                          className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
-                        >
-                          <RotateCcw size={13} className="text-emerald-600" />
-                          <span>Restaurer</span>
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            id={`btn-restore-client-${client.id}`}
+                            onClick={() => onRestore(client)}
+                            title="Restaurer ce client"
+                            className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                          >
+                            <RotateCcw size={13} className="text-emerald-600" />
+                            <span>Restaurer</span>
+                          </button>
+                          <button
+                            type="button"
+                            id={`btn-delete-client-${client.id}`}
+                            onClick={() => onDelete(client)}
+                            title="Supprimer définitivement ce client et ses documents"
+                            className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                          >
+                            <Trash2 size={13} className="text-rose-600" />
+                            <span>Supprimer</span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </td>

@@ -115,6 +115,24 @@ export function useClients(initialStatus: ClientStatusFilter = "active") {
     }
   };
 
+  const deleteClient = async (id: number, clientName: string) => {
+    setError(null);
+    setActionSuccess(null);
+    try {
+      await clientRepository.deleteClientWithRelated(id);
+      setActionSuccess(`Le client "${clientName}" et tous ses documents associés ont été supprimés définitivement.`);
+      await loadClients();
+    } catch (err: unknown) {
+      console.error("[useClients] Error deleting client:", err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de la suppression du client";
+      setError(msg);
+      throw err;
+    }
+  };
+
   const clearMessages = () => {
     setError(null);
     setActionSuccess(null);
@@ -134,6 +152,7 @@ export function useClients(initialStatus: ClientStatusFilter = "active") {
     updateClient,
     archiveClient,
     restoreClient,
+    deleteClient,
     clearMessages,
   };
 }
