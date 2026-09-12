@@ -55,109 +55,11 @@ class WebLocalSqliteClient implements DbClient {
     document_language: "fr",
     updated_at: new Date().toISOString(),
   };
-  private services: Array<Record<string, unknown>> = [
-    {
-      id: 1,
-      code: "ELEC-004",
-      name_fr: "Installation caméra de surveillance",
-      description_fr: "Pose, raccordement et paramétrage d'une caméra IP HD avec accès mobile",
-      name_ar: "تركيب كاميرا مراقبة",
-      description_ar: "تركيب وربط وبرمجة كاميرا مراقبة مع تطبيق الهاتف",
-      name_en: "Security camera installation",
-      description_en: "Mounting, wiring, and configuration of HD IP camera with mobile access",
-      default_unit: "Unité",
-      default_price: 500,
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      code: "ELEC-001",
-      name_fr: "Diagnostic électrique & Recherche de panne",
-      description_fr: "Vérification complète du tableau et des circuits de l'atelier ou du logement",
-      name_ar: "تشخيص الأعطال الكهربائية",
-      description_ar: "فحص شامل للوحة التوزيع والأسلاك الكهربائية",
-      name_en: "Electrical diagnostics & troubleshooting",
-      description_en: "Full checkup of electrical panel and circuit continuity",
-      default_unit: "Forfait",
-      default_price: 350,
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      code: "PLOMB-002",
-      name_fr: "Remplacement chauffe-eau électrique",
-      description_fr: "Dépose de l'ancien appareil, fixation du nouveau et raccordements étanches",
-      name_ar: "تغيير سخان الماء الكهربائي",
-      description_ar: "إزالة السخان القديم وتثبيت وربط السخان الجديد",
-      name_en: "Electric water heater replacement",
-      description_en: "Removal of old heater, mounting and leak-tested plumbing connection",
-      default_unit: "Forfait",
-      default_price: 450,
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
-  private nextServiceId = 4;
+  private services: Array<Record<string, unknown>> = [];
+  private nextServiceId = 1;
 
-  private clients: Array<Record<string, unknown>> = [
-    {
-      id: 1,
-      type: "individual",
-      name: "Ahmed Bennani",
-      contact_person: "",
-      phone: "0661234567",
-      address: "25 Bd Zerktouni, Maarif",
-      city: "Casablanca",
-      email: "ahmed.bennani@gmail.com",
-      ice: "",
-      if_tax: "",
-      rc: "",
-      notes: "Client régulier pour travaux électriques et domotique",
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      type: "company",
-      name: "BATI-MAROC SARL",
-      contact_person: "Karim Idrissi (Gérant)",
-      phone: "0522987654",
-      address: "Lot 45, Zone Industrielle Sidi Maârouf",
-      city: "Casablanca",
-      email: "contact@bati-maroc.ma",
-      ice: "001234567000089",
-      if_tax: "40129876",
-      rc: "189452",
-      notes: "Paiement à 30 jours par virement bancaire",
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      type: "individual",
-      name: "Fatima Zahra Alami",
-      contact_person: "",
-      phone: "0663456789",
-      address: "12 Rue des Orangers, Agdal",
-      city: "Rabat",
-      email: "fz.alami@yahoo.fr",
-      ice: "",
-      if_tax: "",
-      rc: "",
-      notes: "Rénovation plomberie et sanitaire",
-      is_active: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
-  private nextClientId = 4;
+  private clients: Array<Record<string, unknown>> = [];
+  private nextClientId = 1;
 
   private invoices: Array<Record<string, unknown>> = [];
   private nextInvoiceId = 1;
@@ -165,6 +67,14 @@ class WebLocalSqliteClient implements DbClient {
   private nextInvoiceItemId = 1;
   private payments: Array<Record<string, unknown>> = [];
   private nextPaymentId = 1;
+
+  private quotations: Array<Record<string, unknown>> = [];
+  private nextQuotationId = 1;
+  private quotationItems: Array<Record<string, unknown>> = [];
+  private nextQuotationItemId = 1;
+
+  private logos: Array<Record<string, unknown>> = [];
+  private invoiceStyles: Array<Record<string, unknown>> = [];
 
   constructor() {
     console.log("[DB Web Client] Initialized offline browser SQLite fallback adapter.");
@@ -222,6 +132,34 @@ class WebLocalSqliteClient implements DbClient {
           this.nextPaymentId = maxId + 1;
         }
       }
+
+      const storedQuotations = localStorage.getItem("fatora_quotations");
+      if (storedQuotations) {
+        this.quotations = JSON.parse(storedQuotations);
+        if (this.quotations.length > 0) {
+          const maxId = Math.max(...this.quotations.map((q) => Number(q.id) || 1));
+          this.nextQuotationId = maxId + 1;
+        }
+      }
+
+      const storedQuotationItems = localStorage.getItem("fatora_quotation_items");
+      if (storedQuotationItems) {
+        this.quotationItems = JSON.parse(storedQuotationItems);
+        if (this.quotationItems.length > 0) {
+          const maxId = Math.max(...this.quotationItems.map((item) => Number(item.id) || 1));
+          this.nextQuotationItemId = maxId + 1;
+        }
+      }
+
+      const storedLogos = localStorage.getItem("fatora_logos");
+      if (storedLogos) {
+        this.logos = JSON.parse(storedLogos);
+      }
+
+      const storedStyles = localStorage.getItem("fatora_invoice_styles");
+      if (storedStyles) {
+        this.invoiceStyles = JSON.parse(storedStyles);
+      }
     } catch {
       // Ignore localStorage read errors in restricted contexts
     }
@@ -267,6 +205,38 @@ class WebLocalSqliteClient implements DbClient {
     }
   }
 
+  private saveQuotationsToStorage() {
+    try {
+      localStorage.setItem("fatora_quotations", JSON.stringify(this.quotations));
+    } catch {
+      // Ignore
+    }
+  }
+
+  private saveQuotationItemsToStorage() {
+    try {
+      localStorage.setItem("fatora_quotation_items", JSON.stringify(this.quotationItems));
+    } catch {
+      // Ignore
+    }
+  }
+
+  private saveLogosToStorage() {
+    try {
+      localStorage.setItem("fatora_logos", JSON.stringify(this.logos));
+    } catch {
+      // Ignore
+    }
+  }
+
+  private saveInvoiceStylesToStorage() {
+    try {
+      localStorage.setItem("fatora_invoice_styles", JSON.stringify(this.invoiceStyles));
+    } catch {
+      // Ignore
+    }
+  }
+
   async execute(query: string, bindValues: unknown[] = []): Promise<QueryResult> {
     const trimmed = query.trim();
     console.log(`[DB Web Client: EXEC] ${trimmed.slice(0, 100)}...`, bindValues);
@@ -280,8 +250,115 @@ class WebLocalSqliteClient implements DbClient {
       return { rowsAffected: 0 };
     }
 
-    if (trimmed.toUpperCase().includes("PRAGMA FOREIGN_KEYS = ON")) {
+    if (trimmed.toUpperCase().includes("PRAGMA FOREIGN_KEYS")) {
       return { rowsAffected: 0 };
+    }
+
+    // Table Clear (DELETE FROM) handling
+    if (trimmed.toUpperCase().startsWith("DELETE FROM")) {
+      const upper = trimmed.toUpperCase();
+      if (upper.includes("DELETE FROM QUOTATION_ITEMS")) {
+        this.quotationItems = [];
+        this.saveQuotationItemsToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM QUOTATIONS")) {
+        this.quotations = [];
+        this.saveQuotationsToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM PAYMENTS")) {
+        this.payments = [];
+        this.savePaymentsToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM INVOICE_ITEMS")) {
+        this.invoiceItems = [];
+        this.saveInvoiceItemsToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM INVOICES")) {
+        this.invoices = [];
+        this.saveInvoicesToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM CLIENTS")) {
+        this.clients = [];
+        this.saveClientsToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM SERVICES")) {
+        this.services = [];
+        this.saveServicesToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM LOGOS")) {
+        this.logos = [];
+        this.saveLogosToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM INVOICE_STYLES")) {
+        this.invoiceStyles = [];
+        this.saveInvoiceStylesToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM COMPANY_SETTINGS")) {
+        this.companySettings = { id: 1 };
+        try { localStorage.removeItem("fatora_company_settings"); } catch {}
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM APP_METADATA")) {
+        this.metadata.clear();
+        return { rowsAffected: 1 };
+      }
+    }
+
+    // Parameterised generic INSERT INTO tableName ("col1", "col2") VALUES (?, ?)
+    const insertMatch = trimmed.match(/INSERT(?:\s+OR\s+\w+)?\s+INTO\s+([a-zA-Z0-9_]+)\s*\(([^)]+)\)\s*VALUES/i);
+    if (insertMatch) {
+      const tableName = insertMatch[1].toLowerCase();
+      const colNames = insertMatch[2].split(",").map((c) => c.trim().replace(/^["'`]|["'`]$/g, ""));
+      const rowObj: Record<string, unknown> = {};
+      colNames.forEach((col, idx) => {
+        rowObj[col] = bindValues[idx];
+      });
+
+      if (tableName === "quotation_items") {
+        this.quotationItems.push(rowObj);
+        this.saveQuotationItemsToStorage();
+      } else if (tableName === "quotations") {
+        this.quotations.push(rowObj);
+        this.saveQuotationsToStorage();
+      } else if (tableName === "payments") {
+        this.payments.push(rowObj);
+        this.savePaymentsToStorage();
+      } else if (tableName === "invoice_items") {
+        this.invoiceItems.push(rowObj);
+        this.saveInvoiceItemsToStorage();
+      } else if (tableName === "invoices") {
+        this.invoices.push(rowObj);
+        this.saveInvoicesToStorage();
+      } else if (tableName === "clients") {
+        this.clients.push(rowObj);
+        this.saveClientsToStorage();
+      } else if (tableName === "services") {
+        this.services.push(rowObj);
+        this.saveServicesToStorage();
+      } else if (tableName === "logos") {
+        this.logos.push(rowObj);
+        this.saveLogosToStorage();
+      } else if (tableName === "invoice_styles") {
+        this.invoiceStyles.push(rowObj);
+        this.saveInvoiceStylesToStorage();
+      } else if (tableName === "company_settings") {
+        this.companySettings = { ...this.companySettings, ...rowObj };
+        try { localStorage.setItem("fatora_company_settings", JSON.stringify(this.companySettings)); } catch {}
+      } else if (tableName === "app_metadata") {
+        if (rowObj.key && rowObj.value) {
+          this.metadata.set(String(rowObj.key), String(rowObj.value));
+        }
+      }
+      return { rowsAffected: 1, lastInsertId: Number(rowObj.id) || 1 };
     }
 
     if (trimmed.includes("INSERT INTO _schema_migrations") || trimmed.includes("INSERT OR IGNORE INTO _schema_migrations")) {
@@ -632,6 +709,131 @@ class WebLocalSqliteClient implements DbClient {
       return { rowsAffected: 1 };
     }
 
+    // INSERT INTO quotations
+    if (trimmed.toUpperCase().includes("INSERT INTO QUOTATIONS")) {
+      const newId = this.nextQuotationId++;
+      const newQuotation: Record<string, unknown> = {
+        id: newId,
+        quotation_number: bindValues[0] ?? "",
+        sequence_number: Number(bindValues[1]) || 0,
+        sequence_year: Number(bindValues[2]) || new Date().getFullYear(),
+        prefix: bindValues[3] ?? "DEV",
+        status: bindValues[4] ?? "draft",
+        language: bindValues[5] ?? "fr",
+        currency: bindValues[6] ?? "MAD",
+        client_id: bindValues[7] ?? null,
+        client_name: bindValues[8] ?? "",
+        client_type: bindValues[9] ?? "individual",
+        client_contact_person: bindValues[10] ?? "",
+        client_phone: bindValues[11] ?? "",
+        client_address: bindValues[12] ?? "",
+        client_city: bindValues[13] ?? "",
+        client_email: bindValues[14] ?? "",
+        client_ice: bindValues[15] ?? "",
+        client_if: bindValues[16] ?? "",
+        client_rc: bindValues[17] ?? "",
+        seller_name: bindValues[18] ?? "",
+        seller_contact_person: bindValues[19] ?? "",
+        seller_phone: bindValues[20] ?? "",
+        seller_address: bindValues[21] ?? "",
+        seller_city: bindValues[22] ?? "",
+        seller_email: bindValues[23] ?? "",
+        seller_ice: bindValues[24] ?? "",
+        seller_if: bindValues[25] ?? "",
+        seller_rc: bindValues[26] ?? "",
+        seller_patente: bindValues[27] ?? "",
+        seller_cnss: bindValues[28] ?? "",
+        seller_bank_name: bindValues[29] ?? "",
+        seller_rib: bindValues[30] ?? "",
+        quotation_date: bindValues[31] ?? new Date().toISOString().split("T")[0],
+        valid_until_date: bindValues[32] ?? "",
+        notes: bindValues[33] ?? "",
+        payment_terms: bindValues[34] ?? "",
+        subtotal_cents: Number(bindValues[35]) || 0,
+        discount_type: bindValues[36] ?? "fixed",
+        discount_rate: Number(bindValues[37]) || 0,
+        discount_amount_cents: Number(bindValues[38]) || 0,
+        tax_rate: Number(bindValues[39]) || 0,
+        tax_amount_cents: Number(bindValues[40]) || 0,
+        total_cents: Number(bindValues[41]) || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.quotations.push(newQuotation);
+      this.saveQuotationsToStorage();
+      return { rowsAffected: 1, lastInsertId: newId };
+    }
+
+    // UPDATE quotations SET status = ? / converted_invoice_id = ? ...
+    if (trimmed.toUpperCase().includes("UPDATE QUOTATIONS")) {
+      const id = Number(bindValues[bindValues.length - 1]);
+      this.quotations = this.quotations.map((q) => {
+        if (Number(q.id) === id) {
+          const updated: Record<string, unknown> = { ...q, updated_at: new Date().toISOString() };
+          
+          if (trimmed.toUpperCase().includes("STATUS = ?") && trimmed.toUpperCase().includes("CONVERTED_INVOICE_ID = ?")) {
+            updated.status = bindValues[0];
+            updated.converted_invoice_id = bindValues[1];
+          } else if (trimmed.toUpperCase().includes("STATUS = ?")) {
+            updated.status = bindValues[0];
+          }
+          return updated;
+        }
+        return q;
+      });
+      this.saveQuotationsToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // DELETE FROM quotations WHERE id = ?
+    if (trimmed.toUpperCase().includes("DELETE FROM QUOTATIONS WHERE ID =")) {
+      const targetId = Number(bindValues[0]);
+      this.quotations = this.quotations.filter((q) => Number(q.id) !== targetId);
+      this.quotationItems = this.quotationItems.filter((item) => Number(item.quotation_id) !== targetId);
+      this.saveQuotationsToStorage();
+      this.saveQuotationItemsToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // INSERT INTO quotation_items
+    if (trimmed.toUpperCase().includes("INSERT INTO QUOTATION_ITEMS")) {
+      const newId = this.nextQuotationItemId++;
+      const newItem: Record<string, unknown> = {
+        id: newId,
+        quotation_id: Number(bindValues[0]) || 0,
+        service_id: bindValues[1] ?? null,
+        position: Number(bindValues[2]) || 0,
+        name: bindValues[3] ?? "",
+        name_ar: bindValues[4] ?? "",
+        name_en: bindValues[5] ?? "",
+        description: bindValues[6] ?? "",
+        description_ar: bindValues[7] ?? "",
+        description_en: bindValues[8] ?? "",
+        unit: bindValues[9] ?? "U",
+        quantity: Number(bindValues[10]) || 1,
+        unit_price_cents: Number(bindValues[11]) || 0,
+        discount_type: bindValues[12] ?? "fixed",
+        discount_rate: Number(bindValues[13]) || 0,
+        discount_amount_cents: Number(bindValues[14]) || 0,
+        tax_rate: Number(bindValues[15]) || 0,
+        tax_amount_cents: Number(bindValues[16]) || 0,
+        total_cents: Number(bindValues[17]) || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.quotationItems.push(newItem);
+      this.saveQuotationItemsToStorage();
+      return { rowsAffected: 1, lastInsertId: newId };
+    }
+
+    // DELETE FROM quotation_items WHERE quotation_id = ?
+    if (trimmed.toUpperCase().includes("DELETE FROM QUOTATION_ITEMS WHERE QUOTATION_ID =")) {
+      const qId = Number(bindValues[0]);
+      this.quotationItems = this.quotationItems.filter((item) => Number(item.quotation_id) !== qId);
+      this.saveQuotationItemsToStorage();
+      return { rowsAffected: 1 };
+    }
+
     return { rowsAffected: 1 };
   }
 
@@ -779,6 +981,74 @@ class WebLocalSqliteClient implements DbClient {
       } else if (trimmed.includes("WHERE ID =") && bindValues.length > 0) {
         const id = Number(bindValues[0]);
         filtered = filtered.filter((p) => Number(p.id) === id);
+      }
+      return filtered as unknown as T[];
+    }
+
+    // MAX(sequence_number) for quotation sequence
+    if (trimmed.includes("FROM QUOTATIONS") && trimmed.includes("MAX(SEQUENCE_NUMBER)")) {
+      const year = Number(bindValues[0]) || new Date().getFullYear();
+      const prefix = String(bindValues[1] || "DEV");
+      const matching = this.quotations.filter(
+        (q) => Number(q.sequence_year) === year && String(q.prefix) === prefix
+      );
+      const maxSeq = matching.length > 0 ? Math.max(...matching.map((q) => Number(q.sequence_number) || 0)) : 0;
+      return [{ max_seq: maxSeq }] as unknown as T[];
+    }
+
+    // Quotations List / Single
+    if (trimmed.includes("FROM QUOTATIONS")) {
+      let filtered = [...this.quotations];
+
+      if (trimmed.includes("WHERE ID =") && bindValues.length > 0) {
+        const id = Number(bindValues[0]);
+        filtered = filtered.filter((q) => Number(q.id) === id);
+      } else if (trimmed.includes("WHERE QUOTATION_NUMBER =") && bindValues.length > 0) {
+        const num = String(bindValues[0]);
+        filtered = filtered.filter((q) => String(q.quotation_number) === num);
+      } else if (bindValues.length > 0 && trimmed.includes("STATUS = ?")) {
+        const status = String(bindValues[0]);
+        filtered = filtered.filter((q) => String(q.status) === status);
+      }
+
+      return filtered as unknown as T[];
+    }
+
+    // Quotation Items
+    if (trimmed.includes("FROM QUOTATION_ITEMS")) {
+      let filtered = [...this.quotationItems];
+      if (trimmed.includes("WHERE QUOTATION_ID =") && bindValues.length > 0) {
+        const quotationId = Number(bindValues[0]);
+        filtered = filtered.filter((item) => Number(item.quotation_id) === quotationId);
+      }
+      return filtered as unknown as T[];
+    }
+
+    // Logos
+    if (trimmed.includes("FROM LOGOS")) {
+      let filtered = [...this.logos];
+      if (trimmed.includes("WHERE ID =") && bindValues.length > 0) {
+        const id = Number(bindValues[0]);
+        filtered = filtered.filter((l) => Number(l.id) === id);
+      } else if (trimmed.includes("IS_DEFAULT = 1")) {
+        filtered = filtered.filter((l) => Number(l.is_default) === 1 && Number(l.is_archived || 0) === 0);
+      } else if (trimmed.includes("IS_ARCHIVED = 0")) {
+        filtered = filtered.filter((l) => Number(l.is_archived || 0) === 0);
+      }
+      return filtered as unknown as T[];
+    }
+
+    // Invoice Styles
+    if (trimmed.includes("FROM INVOICE_STYLES")) {
+      let filtered = [...this.invoiceStyles];
+      if (trimmed.includes("WHERE ID =") && bindValues.length > 0) {
+        const id = Number(bindValues[0]);
+        filtered = filtered.filter((s) => Number(s.id) === id);
+      } else if (trimmed.includes("STYLE_KEY =") && bindValues.length > 0) {
+        const key = String(bindValues[0]);
+        filtered = filtered.filter((s) => String(s.style_key) === key);
+      } else if (trimmed.includes("IS_DEFAULT = 1")) {
+        filtered = filtered.filter((s) => Number(s.is_default) === 1);
       }
       return filtered as unknown as T[];
     }

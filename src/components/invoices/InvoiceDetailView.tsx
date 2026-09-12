@@ -10,13 +10,13 @@ import {
   Plus,
   Clock,
   Printer,
-  FileDown,
-  Info,
 } from "lucide-react";
 import { Invoice, PaymentMethod } from "../../types/invoice";
 import { invoiceRepository } from "../../db/repositories/invoiceRepository";
 import { InvoiceStatusBadge } from "./InvoiceStatusBadge";
 import { formatMoney } from "../../utils/money";
+import { PdfActionButtons } from "./PdfActionButtons";
+import { PdfDocumentModal } from "./PdfDocumentModal";
 
 interface InvoiceDetailViewProps {
   invoiceId: number;
@@ -43,6 +43,7 @@ export const InvoiceDetailView: React.FC<InvoiceDetailViewProps> = ({
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
 
   const fetchInvoice = async () => {
     setIsLoading(true);
@@ -118,6 +119,15 @@ export const InvoiceDetailView: React.FC<InvoiceDetailViewProps> = ({
 
         {/* Top Action Buttons */}
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setIsPdfModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer min-h-[38px] shadow-xs"
+          >
+            <Printer size={15} className="text-blue-600" />
+            <span>Aperçu PDF & Options</span>
+          </button>
+
           {canAddPayment && (
             <button
               type="button"
@@ -173,6 +183,20 @@ export const InvoiceDetailView: React.FC<InvoiceDetailViewProps> = ({
               {formatMoney(invoice.total_cents, currency, true)}
             </div>
           </div>
+        </div>
+
+        {/* Document Action Bar */}
+        <div className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="text-xs font-bold text-slate-700 flex items-center gap-2">
+            <FileText size={16} className="text-blue-600" />
+            <span>Document A4 & Génération PDF</span>
+          </div>
+
+          <PdfActionButtons
+            invoiceId={invoice.id!}
+            language={invoice.language}
+            onOpenModal={() => setIsPdfModalOpen(true)}
+          />
         </div>
 
         {/* 2-Column: Client & Dates */}
@@ -487,36 +511,16 @@ export const InvoiceDetailView: React.FC<InvoiceDetailViewProps> = ({
             </p>
           </div>
         )}
-
-        {/* PDF Placeholder Info */}
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-slate-600">
-            <Info size={16} className="text-slate-400 shrink-0" />
-            <span>Actions d'impression et PDF</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled
-              title="L'impression sera disponible avec le module PDF."
-              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-400 font-medium text-xs flex items-center gap-1.5 cursor-not-allowed opacity-75"
-            >
-              <Printer size={14} />
-              <span>Imprimer (Bientôt disponible)</span>
-            </button>
-            <button
-              type="button"
-              disabled
-              title="L'ouverture PDF sera disponible avec le module PDF."
-              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-400 font-medium text-xs flex items-center gap-1.5 cursor-not-allowed opacity-75"
-            >
-              <FileDown size={14} />
-              <span>Ouvrir PDF (Bientôt disponible)</span>
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* PDF Modal */}
+      {invoice.id && (
+        <PdfDocumentModal
+          invoiceId={invoice.id}
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

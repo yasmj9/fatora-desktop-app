@@ -56,7 +56,11 @@ const STATUS_FILTERS: { id: "all" | InvoiceStatus; label: string }[] = [
   { id: "cancelled", label: "Annulées" },
 ];
 
-export const FacturesPage: React.FC = () => {
+interface FacturesPageProps {
+  initialInvoiceId?: number | null;
+}
+
+export const FacturesPage: React.FC<FacturesPageProps> = ({ initialInvoiceId }) => {
   const {
     invoices,
     isLoading,
@@ -75,9 +79,20 @@ export const FacturesPage: React.FC = () => {
 
   const { settings } = useCompanySettings();
 
-  const [viewMode, setViewMode] = useState<"list" | "create" | "detail">("list");
+  const [viewMode, setViewMode] = useState<"list" | "create" | "detail">(
+    initialInvoiceId ? "detail" : "list"
+  );
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
+    initialInvoiceId || null
+  );
+
+  useEffect(() => {
+    if (initialInvoiceId) {
+      setSelectedInvoiceId(initialInvoiceId);
+      setViewMode("detail");
+    }
+  }, [initialInvoiceId]);
 
   // Modals state
   const [paymentModalInvoice, setPaymentModalInvoice] = useState<Invoice | null>(null);

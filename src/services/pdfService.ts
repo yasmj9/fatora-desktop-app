@@ -1,0 +1,119 @@
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import { DocumentData } from "../types/documentData";
+import { generateSafeFilename } from "../utils/documentTranslations";
+
+export const pdfService = {
+  /**
+   * Captures an A4 DOM container and converts it into a jsPDF instance.
+   */
+  async generatePdfFromElement(element: HTMLElement): Promise<jsPDF> {
+    const canvas = await html2canvas(element, {
+      scale: 2, // High resolution for sharp text and crisp logos
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+    const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    if (imgHeight <= pdfHeight) {
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    } else {
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+    }
+
+    return pdf;
+  },
+
+  /**
+   * Action: Enregistrer PDF (Saves file directly to computer with safe filename)
+   */
+  async downloadPdf(element: HTMLElement, documentData: DocumentData): Promise<string> {
+    const pdf = await this.generatePdfFromElement(element);
+    const filename = generateSafeFilename(
+      documentData.documentNumber,
+      documentData.client.name,
+      "pdf"
+    );
+    pdf.save(filename);
+    return filename;
+  },
+
+  /**
+   * Action: Générer/Ouvrir PDF (Opens generated PDF blob in a new browser tab/window)
+   */
+  async openPdfInNewTab(element: HTMLElement): Promise<void> {
+    const pdf = await this.generatePdfFromElement(element);
+    const blob = pdf.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, "_blank");
+  },
+
+  /**
+   * Action: Imprimer (Triggers clean print for the document)
+   */
+  async printDocument(element: HTMLElement): Promise<void> {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    const isRtl = element.getAttribute("dir") === "rtl";
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="${isRtl ? "ar" : "fr"}" dir="${isRtl ? "rtl" : "ltr"}">
+        <head>
+          <title>Impression Facture</title>
+          <meta charset="utf-8" />
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              body { margin: 0; padding: 0; background: white; }
+              @page { size: A4; margin: 8mm; }
+            }
+          </style>
+        </head>
+        <body class="bg-white p-4 font-sans">
+          <div style="max-width: 800px; margin: 0 auto;">
+            ${element.outerHTML}
+          </div>
+          <script>
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => window.close(), 500);
+            }, 600);
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  },
+};

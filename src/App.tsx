@@ -11,15 +11,21 @@ import { ParametresPage } from "./pages/ParametresPage";
 
 export function App() {
   const [currentPage, setCurrentPage] = useState<NavPageId>("accueil");
+  const [targetInvoiceId, setTargetInvoiceId] = useState<number | null>(null);
+
+  const handleNavigateToInvoice = (invoiceId: number) => {
+    setTargetInvoiceId(invoiceId);
+    setCurrentPage("factures");
+  };
 
   const renderContent = () => {
     switch (currentPage) {
       case "accueil":
         return <AccueilPage onNavigate={setCurrentPage} />;
       case "factures":
-        return <FacturesPage />;
+        return <FacturesPage initialInvoiceId={targetInvoiceId} />;
       case "devis":
-        return <DevisPage />;
+        return <DevisPage onNavigateToInvoice={handleNavigateToInvoice} />;
       case "clients":
         return <ClientsPage />;
       case "services":

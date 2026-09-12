@@ -10,15 +10,17 @@ import {
   Cpu,
   Image as ImageIcon,
   Palette,
+  HardDriveDownload,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useDatabaseStatus } from "../context/DatabaseContext";
 import { CompanySettingsForm } from "../components/settings/CompanySettingsForm";
 import { LogoManager } from "../components/settings/LogoManager";
 import { InvoiceStyleManager } from "../components/settings/InvoiceStyleManager";
+import { BackupRestoreManager } from "../components/settings/BackupRestoreManager";
 
 export const ParametresPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"company" | "logos" | "styles" | "system">("company");
+  const [activeTab, setActiveTab] = useState<"company" | "logos" | "styles" | "backup" | "system">("company");
   const [greetName, setGreetName] = useState("");
   const [greetMsg, setGreetMsg] = useState("");
   const [isGreeting, setIsGreeting] = useState(false);
@@ -66,12 +68,12 @@ export const ParametresPage: React.FC = () => {
         </div>
 
         {/* Tab switcher */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl w-fit">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl w-fit flex-wrap">
           <button
             type="button"
             id="tab-company-settings"
             onClick={() => setActiveTab("company")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === "company"
                 ? "bg-white text-blue-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -84,7 +86,7 @@ export const ParametresPage: React.FC = () => {
             type="button"
             id="tab-logo-settings"
             onClick={() => setActiveTab("logos")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === "logos"
                 ? "bg-white text-blue-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -97,7 +99,7 @@ export const ParametresPage: React.FC = () => {
             type="button"
             id="tab-style-settings"
             onClick={() => setActiveTab("styles")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === "styles"
                 ? "bg-white text-blue-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -108,9 +110,22 @@ export const ParametresPage: React.FC = () => {
           </button>
           <button
             type="button"
+            id="tab-backup-settings"
+            onClick={() => setActiveTab("backup")}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "backup"
+                ? "bg-white text-blue-700 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <HardDriveDownload size={16} />
+            <span>Sauvegarde & Restauration</span>
+          </button>
+          <button
+            type="button"
             id="tab-system-settings"
             onClick={() => setActiveTab("system")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === "system"
                 ? "bg-white text-blue-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -131,6 +146,9 @@ export const ParametresPage: React.FC = () => {
       ) : activeTab === "styles" ? (
         /* Invoice Style Manager Tab */
         <InvoiceStyleManager />
+      ) : activeTab === "backup" ? (
+        /* Backup & Restore Manager Tab */
+        <BackupRestoreManager onDataRestored={() => retryInit()} />
       ) : (
         /* System & Diagnostics Tab */
         <div className="space-y-6">

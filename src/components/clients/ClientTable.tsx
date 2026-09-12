@@ -161,20 +161,22 @@ export const ClientTable: React.FC<ClientTableProps> = ({
                         type="button"
                         id={`btn-view-client-${client.id}`}
                         onClick={() => onViewDetails(client)}
-                        title="Voir détails"
-                        className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                        title="Voir les détails du client"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
                       >
-                        <Eye size={17} />
+                        <Eye size={13} className="text-slate-500" />
+                        <span>Voir</span>
                       </button>
 
                       <button
                         type="button"
                         id={`btn-edit-client-${client.id}`}
                         onClick={() => onEdit(client)}
-                        title="Modifier"
-                        className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                        title="Modifier les coordonnées"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
                       >
-                        <Edit2 size={17} />
+                        <Edit2 size={13} className="text-slate-500" />
+                        <span>Modifier</span>
                       </button>
 
                       {isActive ? (
@@ -182,20 +184,22 @@ export const ClientTable: React.FC<ClientTableProps> = ({
                           type="button"
                           id={`btn-archive-client-${client.id}`}
                           onClick={() => onArchive(client)}
-                          title="Archiver"
-                          className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                          title="Archiver ce client"
+                          className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
                         >
-                          <Archive size={17} />
+                          <Archive size={13} className="text-amber-600" />
+                          <span>Archiver</span>
                         </button>
                       ) : (
                         <button
                           type="button"
                           id={`btn-restore-client-${client.id}`}
                           onClick={() => onRestore(client)}
-                          title="Restaurer"
-                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                          title="Restaurer ce client"
+                          className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
                         >
-                          <RotateCcw size={17} />
+                          <RotateCcw size={13} className="text-emerald-600" />
+                          <span>Restaurer</span>
                         </button>
                       )}
                     </div>

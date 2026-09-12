@@ -123,6 +123,7 @@ export interface Invoice {
   status: InvoiceStatus;
   language: DocumentLanguage;
   currency: string;           // e.g. "MAD"
+  style_id?: number | null;
 
   // Client historical snapshot
   client_id?: number | null;

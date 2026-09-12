@@ -1,24 +1,49 @@
 import React from "react";
-import { InvoiceStyle } from "../../../types/invoiceStyle";
-import { CompanySettings } from "../../../types/company";
+import { DocumentData } from "../../../types/documentData";
+import { DOCUMENT_TRANSLATIONS, getPaymentMethodLabel } from "../../../utils/documentTranslations";
 import { formatMoney } from "../../../utils/money";
 
 interface StyleLayoutProps {
-  style: InvoiceStyle;
-  company: CompanySettings;
-  logoData: string | null;
-  invoice: typeof import("../sampleData").sampleInvoiceData;
+  documentData: DocumentData;
 }
 
-export const Style2Moderne: React.FC<StyleLayoutProps> = ({
-  style,
-  company,
-  logoData,
-  invoice,
-}) => {
+export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
+  const {
+    documentNumber,
+    date,
+    dueDate,
+    language,
+    currency,
+    company,
+    client,
+    items,
+    subtotalCents,
+    discountCents,
+    taxRate,
+    taxAmountCents,
+    totalCents,
+    paidAmountCents,
+    remainingBalanceCents,
+    payments,
+    notes,
+    paymentTerms,
+    style,
+  } = documentData;
+
+  const isRtl = language === "ar";
+  const labels = DOCUMENT_TRANSLATIONS[language] || DOCUMENT_TRANSLATIONS.fr;
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-xs font-sans text-slate-800 relative">
-      {/* Accent Top/Side Banner */}
+    <div
+      dir={isRtl ? "rtl" : "ltr"}
+      className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-xs font-sans text-slate-800 relative space-y-0"
+      style={{
+        fontFamily: isRtl
+          ? "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans Arabic', 'Cairo', 'Amiri', 'Tahoma', sans-serif"
+          : undefined,
+      }}
+    >
+      {/* Accent Top Banner */}
       <div
         className="h-2 w-full"
         style={{ backgroundColor: style.accent_color || "#0d9488" }}
@@ -28,8 +53,12 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div className="space-y-2">
-            {logoData ? (
-              <img src={logoData} alt="Logo" className="max-h-16 max-w-[220px] object-contain mb-2" />
+            {company.logoDataUrl ? (
+              <img
+                src={company.logoDataUrl}
+                alt="Logo"
+                className="max-h-16 max-w-[220px] object-contain mb-2"
+              />
             ) : (
               <div
                 className="font-black text-xl tracking-tight"
@@ -40,90 +69,126 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({
             )}
 
             <div className="text-[11px] text-slate-500 space-y-0.5">
-              {style.show_address && company.address && <div>{company.address}, {company.city}</div>}
-              <div className="flex gap-3 text-slate-600 font-medium">
+              {style.show_address && company.address && (
+                <div>
+                  {company.address}
+                  {company.city ? `, ${company.city}` : ""}
+                </div>
+              )}
+              <div className="flex flex-wrap gap-3 text-slate-600 font-medium">
                 {style.show_phone && company.phone && <span>{company.phone}</span>}
                 {style.show_email && company.email && <span>{company.email}</span>}
               </div>
             </div>
           </div>
 
-          <div className="text-left sm:text-right space-y-1">
+          <div className={`${isRtl ? "text-left" : "text-right"} space-y-1 w-full sm:w-auto`}>
             <span
-              className="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest text-white shadow-xs"
-              style={{ backgroundColor: style.accent_color }}
+              className="inline-block px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest text-white shadow-xs"
+              style={{ backgroundColor: style.accent_color || "#0d9488" }}
             >
-              FACTURE
+              {labels.invoiceTitle}
             </span>
-            <div className="font-mono font-extrabold text-slate-900 text-base">{invoice.number}</div>
-            <div className="text-[11px] text-slate-500">
-              Émise le <span className="font-semibold text-slate-700">{invoice.date}</span>
+            <div className="font-mono font-extrabold text-slate-900 text-base">
+              {documentNumber}
             </div>
             <div className="text-[11px] text-slate-500">
-              Échéance : <span className="font-semibold text-slate-700">{invoice.dueDate}</span>
+              {labels.date} : <span className="font-semibold text-slate-700">{date}</span>
             </div>
+            {dueDate && (
+              <div className="text-[11px] text-slate-500">
+                {labels.dueDate} : <span className="font-semibold text-slate-700">{dueDate}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Client & Legal Information */}
+        {/* Client & Issuer References */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-slate-100">
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-              CLIENT / DESTINATAIRE
+              {labels.billedTo}
             </div>
-            <div className="font-bold text-slate-900 text-sm">{invoice.clientName}</div>
-            {invoice.clientAddress && <div className="text-[11px] text-slate-600">{invoice.clientAddress}</div>}
-            {invoice.clientIce && <div className="text-[11px] font-mono text-slate-500">ICE : {invoice.clientIce}</div>}
+            <div className="font-bold text-slate-900 text-sm">{client.name}</div>
+            {client.contactPerson && (
+              <div className="text-[11px] text-slate-600">{client.contactPerson}</div>
+            )}
+            {client.phone && (
+              <div className="text-[11px] text-slate-600">
+                {labels.phone} : {client.phone}
+              </div>
+            )}
+            {client.address && (
+              <div className="text-[11px] text-slate-600">
+                {client.address}
+                {client.city ? `, ${client.city}` : ""}
+              </div>
+            )}
+            {client.ice && (
+              <div className="text-[11px] font-mono text-slate-500">
+                {labels.ice} : {client.ice}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-              RÉFÉRENCES ÉMETTEUR
+              {labels.issuerInfo}
             </div>
-            <div className="flex flex-wrap gap-2 text-[10px] font-mono">
+            <div className="flex flex-wrap gap-2 text-[10px] font-mono pt-1">
               {style.show_ice && company.ice && (
                 <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-slate-700">
-                  ICE: {company.ice}
+                  {labels.ice}: {company.ice}
                 </span>
               )}
-              {style.show_tax_id && company.if_tax && (
+              {style.show_tax_id && company.ifTax && (
                 <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-slate-700">
-                  IF: {company.if_tax}
+                  {labels.ifTax}: {company.ifTax}
                 </span>
               )}
               {style.show_rc && company.rc && (
                 <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-slate-700">
-                  RC: {company.rc}
+                  {labels.rc}: {company.rc}
                 </span>
               )}
               {style.show_cnss && company.cnss && (
                 <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-slate-700">
-                  CNSS: {company.cnss}
+                  {labels.cnss}: {company.cnss}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Minimal Table */}
+        {/* Line Items Table */}
         <div className="overflow-hidden rounded-xl border border-slate-100">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
+          <table className="w-full">
+            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-200">
               <tr>
-                <th className="py-3 px-4">Prestation / Description</th>
-                <th className="py-3 px-4 text-center">Quantité</th>
-                <th className="py-3 px-4 text-right">Prix Unitaire</th>
-                <th className="py-3 px-4 text-right">Montant HT</th>
+                <th className={`py-3 px-4 ${isRtl ? "text-right" : "text-left"}`}>
+                  {labels.description}
+                </th>
+                <th className="py-3 px-4 text-center">{labels.quantity}</th>
+                <th className={`py-3 px-4 ${isRtl ? "text-left" : "text-right"}`}>
+                  {labels.unitPrice}
+                </th>
+                <th className={`py-3 px-4 ${isRtl ? "text-left" : "text-right"}`}>
+                  {labels.totalHT}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-[11px]">
-              {invoice.items.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50">
-                  <td className="py-3 px-4 font-semibold text-slate-800">{item.description}</td>
+              {items.map((item, idx) => (
+                <tr key={item.id || idx} className="hover:bg-slate-50/50">
+                  <td className={`py-3 px-4 font-semibold text-slate-800 ${isRtl ? "text-right" : "text-left"}`}>
+                    {item.description}
+                  </td>
                   <td className="py-3 px-4 text-center font-mono">{item.quantity}</td>
-                  <td className="py-3 px-4 text-right font-mono">{formatMoney(item.unitPriceCents, "MAD", false)}</td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-                    {formatMoney(item.totalCents, "MAD", false)}
+                  <td className={`py-3 px-4 font-mono ${isRtl ? "text-left" : "text-right"}`}>
+                    {formatMoney(item.unitPriceCents, currency, false)}
+                  </td>
+                  <td className={`py-3 px-4 font-mono font-bold text-slate-900 ${isRtl ? "text-left" : "text-right"}`}>
+                    {formatMoney(item.totalCents, currency, false)}
                   </td>
                 </tr>
               ))}
@@ -131,13 +196,17 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({
           </table>
         </div>
 
-        {/* Bottom Totals & Payment Info */}
+        {/* Totals & Bank Coordinates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end pt-2">
-          {style.show_iban && company.rib_iban ? (
+          {style.show_iban && company.ribIban ? (
             <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/60 space-y-1 text-[11px]">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Coordonnées de virement :</div>
-              <div className="font-bold text-slate-800">{company.bank_name || "Banque"}</div>
-              <div className="font-mono text-[10px] text-slate-600 break-all">{company.rib_iban}</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                {labels.bankDetails} :
+              </div>
+              <div className="font-bold text-slate-800">{company.bankName || "Banque"}</div>
+              <div className="font-mono text-[10px] text-slate-600 break-all">
+                {company.ribIban}
+              </div>
             </div>
           ) : (
             <div />
@@ -145,36 +214,88 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({
 
           <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
             <div className="flex justify-between text-slate-500 text-[11px]">
-              <span>Sous-total HT</span>
-              <span className="font-mono font-bold text-slate-800">{formatMoney(invoice.subtotalCents, "MAD", true)}</span>
+              <span>{labels.subtotalHT}</span>
+              <span className="font-mono font-bold text-slate-800">
+                {formatMoney(subtotalCents, currency, true)}
+              </span>
             </div>
-            <div className="flex justify-between text-slate-500 text-[11px]">
-              <span>TVA ({invoice.taxRate}%)</span>
-              <span className="font-mono font-bold text-slate-800">{formatMoney(invoice.taxAmountCents, "MAD", true)}</span>
-            </div>
+
+            {discountCents > 0 && (
+              <div className="flex justify-between text-emerald-700 text-[11px]">
+                <span>{labels.discount}</span>
+                <span className="font-mono font-bold">
+                  - {formatMoney(discountCents, currency, true)}
+                </span>
+              </div>
+            )}
+
+            {taxAmountCents > 0 && (
+              <div className="flex justify-between text-slate-500 text-[11px]">
+                <span>
+                  {labels.tax} ({taxRate}%)
+                </span>
+                <span className="font-mono font-bold text-slate-800">
+                  {formatMoney(taxAmountCents, currency, true)}
+                </span>
+              </div>
+            )}
 
             <div
               className="flex justify-between text-base font-black pt-2 border-t border-slate-200"
               style={{ color: style.primary_color }}
             >
-              <span>Total TTC</span>
-              <span className="font-mono">{formatMoney(invoice.totalCents, "MAD", true)}</span>
+              <span>{labels.totalTTC}</span>
+              <span className="font-mono">{formatMoney(totalCents, currency, true)}</span>
             </div>
 
-            {invoice.paidCents > 0 && (
+            {paidAmountCents > 0 && (
               <div className="flex justify-between text-emerald-600 font-bold text-[11px]">
-                <span>Acompte perçu</span>
-                <span className="font-mono">{formatMoney(invoice.paidCents, "MAD", true)}</span>
+                <span>{labels.paidAmount}</span>
+                <span className="font-mono">{formatMoney(paidAmountCents, currency, true)}</span>
               </div>
             )}
-            {invoice.balanceCents > 0 && (
+
+            {remainingBalanceCents > 0 && (
               <div className="flex justify-between text-rose-600 font-bold text-[11px] pt-1 border-t border-dashed border-slate-200">
-                <span>Reste à payer</span>
-                <span className="font-mono">{formatMoney(invoice.balanceCents, "MAD", true)}</span>
+                <span>{labels.remainingAmount}</span>
+                <span className="font-mono">{formatMoney(remainingBalanceCents, currency, true)}</span>
               </div>
             )}
           </div>
         </div>
+
+        {/* Payment History (if present) */}
+        {payments && payments.length > 0 && (
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {labels.paymentHistory}
+            </div>
+            <div className="space-y-1 text-[11px]">
+              {payments.map((p, idx) => (
+                <div key={p.id || idx} className="flex justify-between font-mono text-slate-700">
+                  <span>
+                    {p.date} — {getPaymentMethodLabel(p.method, language)}
+                  </span>
+                  <span className="font-bold text-emerald-700">
+                    + {formatMoney(p.amountCents, currency, true)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Notes & Terms */}
+        {(notes || paymentTerms) && (
+          <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/60 text-[11px] text-amber-900 space-y-1">
+            {paymentTerms && (
+              <div>
+                <span className="font-bold">{labels.notes} :</span> {paymentTerms}
+              </div>
+            )}
+            {notes && <p className="whitespace-pre-line">{notes}</p>}
+          </div>
+        )}
 
         {/* Footer Note */}
         <div
@@ -184,7 +305,7 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({
             color: "#475569",
           }}
         >
-          {style.footer_text}
+          {style.footer_text || "Merci de votre confiance."}
         </div>
       </div>
     </div>

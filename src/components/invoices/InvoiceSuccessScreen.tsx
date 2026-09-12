@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   CheckCircle2,
-  Printer,
-  FileDown,
   Plus,
   ArrowLeft,
   Calendar,
-  Info,
+  FileText,
 } from "lucide-react";
 import { Invoice } from "../../types/invoice";
 import { formatMoney } from "../../utils/money";
+import { PdfActionButtons } from "./PdfActionButtons";
+import { PdfDocumentModal } from "./PdfDocumentModal";
 
 interface InvoiceSuccessScreenProps {
   invoice: Invoice;
@@ -22,6 +22,7 @@ export const InvoiceSuccessScreen: React.FC<InvoiceSuccessScreenProps> = ({
   onNewInvoice,
   onBackToHome,
 }) => {
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
   const currency = invoice.currency || "MAD";
 
   return (
@@ -33,10 +34,10 @@ export const InvoiceSuccessScreen: React.FC<InvoiceSuccessScreenProps> = ({
         </div>
         <div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Facture créée
+            Facture créée avec succès
           </h2>
           <p className="text-slate-500 text-sm mt-1">
-            La facture a été enregistrée avec succès dans votre base de données locale.
+            La facture a été enregistrée dans votre base de données.
           </p>
         </div>
       </div>
@@ -129,37 +130,30 @@ export const InvoiceSuccessScreen: React.FC<InvoiceSuccessScreenProps> = ({
           </div>
         </div>
 
-        {/* PDF Actions (Explicitly not implemented yet as instructed) */}
-        <div className="space-y-2">
-          <div className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-2">
-            <Info size={14} className="text-slate-400" />
-            <span>Actions document (PDF)</span>
-          </div>
+        {/* PDF Document Actions */}
+        {invoice.id && (
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                <FileText size={16} className="text-blue-600" />
+                <span>Impression & PDF de la facture</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPdfModalOpen(true)}
+                className="text-xs font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer"
+              >
+                Aperçu complet & styles
+              </button>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              type="button"
-              id="btn-print-invoice"
-              disabled
-              title="L'impression et la génération PDF seront intégrées à la prochaine étape."
-              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-sm cursor-not-allowed opacity-75"
-            >
-              <Printer size={18} />
-              <span>Imprimer (Bientôt disponible)</span>
-            </button>
-
-            <button
-              type="button"
-              id="btn-open-pdf"
-              disabled
-              title="La génération PDF sera intégrée à la prochaine étape."
-              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-sm cursor-not-allowed opacity-75"
-            >
-              <FileDown size={18} />
-              <span>Ouvrir PDF (Bientôt disponible)</span>
-            </button>
+            <PdfActionButtons
+              invoiceId={invoice.id}
+              language={invoice.language}
+              onOpenModal={() => setIsPdfModalOpen(true)}
+            />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Primary Navigation Actions */}
@@ -181,9 +175,18 @@ export const InvoiceSuccessScreen: React.FC<InvoiceSuccessScreenProps> = ({
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-md hover:shadow-lg min-h-[48px]"
         >
           <Plus size={18} />
-          <span>Nouvelle facture</span>
+          <span>Créer une nouvelle facture</span>
         </button>
       </div>
+
+      {/* PDF Modal */}
+      {invoice.id && (
+        <PdfDocumentModal
+          invoiceId={invoice.id}
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
