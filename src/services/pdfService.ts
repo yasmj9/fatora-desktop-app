@@ -14,7 +14,18 @@ export const pdfService = {
       logging: false,
       backgroundColor: "#ffffff",
       onclone: (clonedDoc) => {
-        // Sanitize oklch colors in inline styles
+        // Helper to check and sanitize modern color functions
+        const sanitizeColor = (val: string): string => {
+          if (!val) return val;
+          if (val.includes("oklch") || val.includes("oklab")) {
+            return val
+              .replace(/oklch\([^)]+\)/g, "#3b82f6")
+              .replace(/oklab\([^)]+\)/g, "#3b82f6");
+          }
+          return val;
+        };
+
+        // Sanitize modern colors in inline styles
         const allElements = clonedDoc.querySelectorAll("*");
         allElements.forEach((el) => {
           const htmlEl = el as HTMLElement;
@@ -22,18 +33,20 @@ export const pdfService = {
             for (let i = 0; i < htmlEl.style.length; i++) {
               const prop = htmlEl.style[i];
               const val = htmlEl.style.getPropertyValue(prop);
-              if (val && val.includes("oklch")) {
-                htmlEl.style.setProperty(prop, "#3b82f6");
+              if (val && (val.includes("oklch") || val.includes("oklab"))) {
+                htmlEl.style.setProperty(prop, sanitizeColor(val));
               }
             }
           }
         });
 
-        // Sanitize oklch colors in style tags and stylesheets
+        // Sanitize modern colors in style tags and stylesheets
         const styleTags = clonedDoc.querySelectorAll("style");
         styleTags.forEach((tag) => {
-          if (tag.textContent && tag.textContent.includes("oklch")) {
-            tag.textContent = tag.textContent.replace(/oklch\([^)]+\)/g, "#3b82f6");
+          if (tag.textContent && (tag.textContent.includes("oklch") || tag.textContent.includes("oklab"))) {
+            tag.textContent = tag.textContent
+              .replace(/oklch\([^)]+\)/g, "#3b82f6")
+              .replace(/oklab\([^)]+\)/g, "#3b82f6");
           }
         });
 
@@ -48,8 +61,8 @@ export const pdfService = {
                   for (let k = 0; k < rule.style.length; k++) {
                     const prop = rule.style[k];
                     const val = rule.style.getPropertyValue(prop);
-                    if (val && val.includes("oklch")) {
-                      rule.style.setProperty(prop, "#3b82f6");
+                    if (val && (val.includes("oklch") || val.includes("oklab"))) {
+                      rule.style.setProperty(prop, sanitizeColor(val));
                     }
                   }
                 }
