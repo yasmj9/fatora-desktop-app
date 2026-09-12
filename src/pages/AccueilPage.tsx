@@ -328,9 +328,9 @@ export const AccueilPage: React.FC<AccueilPageProps> = ({ onNavigate }) => {
             {/* List or Simple Honest Empty State */}
             {recentInvoices.length > 0 ? (
               <div className="space-y-2.5">
-                {recentInvoices.map((inv) => (
+                {recentInvoices.map((inv, index) => (
                   <div
-                    key={inv.id}
+                    key={inv.id || index}
                     onClick={() => onNavigate("factures")}
                     className="p-3 bg-slate-50/80 hover:bg-blue-50/50 rounded-xl border border-slate-200/80 transition-colors cursor-pointer flex items-center justify-between gap-3"
                   >
