@@ -6,7 +6,6 @@ import {
   Users,
   Wrench,
   Settings,
-  ShieldCheck,
   AlertCircle,
   Loader2,
 } from "lucide-react";
@@ -16,6 +15,8 @@ import { useDatabaseStatus } from "../../context/DatabaseContext";
 interface SidebarProps {
   currentPage: NavPageId;
   onNavigate: (page: NavPageId) => void;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 interface MenuItem {
@@ -57,34 +58,55 @@ const MENU_ITEMS: MenuItem[] = [
   },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onToggle }) => {
   const { status } = useDatabaseStatus();
 
   return (
     <aside
       id="main-sidebar"
-      className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between h-screen shrink-0 select-none shadow-xs"
+      className={`${
+        isOpen ? "w-64" : "w-20"
+      } bg-white border-r border-slate-200 flex flex-col justify-between h-screen shrink-0 select-none shadow-md lg:shadow-xs z-30 transition-all duration-300 ease-in-out`}
     >
-      {/* Top Section: App Branding & Logo */}
+      {/* Top Section: App Branding & Logo / Toggle */}
       <div>
-        <div className="p-6 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs">
+        <div 
+          className={`p-4 border-b border-slate-100 flex items-center ${isOpen ? "justify-start cursor-pointer hover:bg-slate-50 transition-colors" : "justify-center"}`}
+          onClick={() => {
+            if (isOpen) onToggle();
+          }}
+          title={isOpen ? "Réduire le menu" : undefined}
+        >
+          {isOpen ? (
+            <div className="flex items-center gap-3 overflow-hidden w-full">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs shrink-0">
+                F
+              </div>
+              <div className="truncate flex-1">
+                <h1 className="font-bold text-lg text-slate-900 leading-tight truncate">
+                  Fatora
+                </h1>
+                <p className="text-xs text-slate-500 font-medium truncate">
+                  Facturation & Devis
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs cursor-pointer hover:bg-blue-700 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              title="Ouvrir le menu"
+            >
               F
             </div>
-            <div>
-              <h1 className="font-bold text-lg text-slate-900 leading-tight">
-                Fatora
-              </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Facturation & Devis
-              </p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Navigation Menu */}
-        <nav className="p-4 space-y-1.5" aria-label="Menu principal">
+        <nav className="p-3 space-y-1.5" aria-label="Menu principal">
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -93,9 +115,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
               <button
                 key={item.id}
                 id={`nav-link-${item.id}`}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => {
+                  onNavigate(item.id);
+                  if (window.innerWidth < 1024) {
+                    onToggle();
+                  }
+                }}
                 type="button"
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-left transition-all duration-150 cursor-pointer min-h-[48px] ${
+                title={!isOpen ? item.label : undefined}
+                className={`w-full flex items-center ${
+                  isOpen ? "gap-3 px-4 py-3" : "justify-center px-0 py-3"
+                } rounded-xl font-medium text-left transition-all duration-150 cursor-pointer min-h-[48px] ${
                   isActive
                     ? "bg-blue-600 text-white shadow-xs font-semibold"
                     : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200"
@@ -107,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                     isActive ? "text-white" : "text-slate-500"
                   }`}
                 />
-                <span className="text-sm tracking-wide">{item.label}</span>
+                {isOpen && <span className="text-sm tracking-wide truncate">{item.label}</span>}
               </button>
             );
           })}
@@ -115,35 +145,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
       </div>
 
       {/* Bottom Section: Offline Status & Security */}
-      <div className="p-4 m-4 rounded-xl bg-slate-50 border border-slate-200/80">
-        <div className="flex items-center gap-2 mb-1">
+      <div className={`p-3 m-3 rounded-xl bg-slate-50 border border-slate-200/80 ${!isOpen ? "flex flex-col items-center justify-center text-center" : ""}`}>
+        <div className="flex items-center justify-center gap-2 mb-1">
           {status === "ready" ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                <ShieldCheck size={14} className="text-emerald-600" />
-                Mode Hors-Ligne Actif
-              </span>
-            </>
+            <div title="Mode Hors-Ligne Actif">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block shrink-0"></span>
+            </div>
           ) : status === "initializing" ? (
-            <>
-              <Loader2 size={14} className="text-amber-500 animate-spin" />
-              <span className="text-xs font-semibold text-slate-700">
-                Initialisation locale...
-              </span>
-            </>
+            <div title="Initialisation...">
+              <Loader2 size={14} className="text-amber-500 animate-spin shrink-0" />
+            </div>
           ) : (
-            <>
-              <AlertCircle size={14} className="text-rose-500" />
-              <span className="text-xs font-semibold text-rose-700">
-                Stockage local hors service
-              </span>
-            </>
+            <div title="Erreur stockage">
+              <AlertCircle size={14} className="text-rose-500 shrink-0" />
+            </div>
+          )}
+          {isOpen && (
+            <span className="text-xs font-semibold text-slate-700 truncate">
+              {status === "ready" ? "Hors-Ligne Actif" : status === "initializing" ? "Init..." : "Erreur"}
+            </span>
           )}
         </div>
-        <p className="text-[11px] text-slate-500 leading-normal">
-          Vos données restent 100% sur votre ordinateur.
-        </p>
+        {isOpen && (
+          <p className="text-[11px] text-slate-500 leading-normal truncate">
+            Données 100% locales
+          </p>
+        )}
       </div>
     </aside>
   );

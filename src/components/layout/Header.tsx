@@ -1,8 +1,11 @@
 import React from "react";
 import { NavPageId } from "../../types/navigation";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 interface HeaderProps {
   currentPage: NavPageId;
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
 }
 
 const PAGE_TITLES: Record<NavPageId, { title: string; subtitle: string }> = {
@@ -32,7 +35,7 @@ const PAGE_TITLES: Record<NavPageId, { title: string; subtitle: string }> = {
   },
 };
 
-export const Header: React.FC<HeaderProps> = ({ currentPage }) => {
+export const Header: React.FC<HeaderProps> = ({ currentPage, isSidebarOpen, onToggleSidebar }) => {
   const currentInfo = PAGE_TITLES[currentPage] || {
     title: "Fatora",
     subtitle: "Gestion de Facturation",
@@ -41,15 +44,27 @@ export const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   return (
     <header
       id="app-header"
-      className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0"
+      className="h-20 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0"
     >
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-          {currentInfo.title}
-        </h2>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          {currentInfo.subtitle}
-        </p>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          id="btn-toggle-sidebar"
+          onClick={onToggleSidebar}
+          title={isSidebarOpen ? "Fermer le menu latéral" : "Ouvrir le menu latéral"}
+          className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
+        >
+          {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+        </button>
+
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+            {currentInfo.title}
+          </h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5 hidden sm:block">
+            {currentInfo.subtitle}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

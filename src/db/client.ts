@@ -74,6 +74,7 @@ class WebLocalSqliteClient implements DbClient {
   private nextQuotationItemId = 1;
 
   private logos: Array<Record<string, unknown>> = [];
+  private nextLogoId = 1;
   private invoiceStyles: Array<Record<string, unknown>> = [];
 
   constructor() {
@@ -154,11 +155,89 @@ class WebLocalSqliteClient implements DbClient {
       const storedLogos = localStorage.getItem("fatora_logos");
       if (storedLogos) {
         this.logos = JSON.parse(storedLogos);
+        if (this.logos.length > 0) {
+          const maxId = Math.max(...this.logos.map((l) => Number(l.id) || 1));
+          this.nextLogoId = maxId + 1;
+        }
       }
 
       const storedStyles = localStorage.getItem("fatora_invoice_styles");
       if (storedStyles) {
         this.invoiceStyles = JSON.parse(storedStyles);
+      }
+      if (this.invoiceStyles.length === 0) {
+        this.invoiceStyles = [
+          {
+            id: 1,
+            style_key: 'style_1',
+            name: 'Style 1 — Classique',
+            description: 'Présentation traditionnelle et structurée avec en-tête encadré et grille de facturation nette.',
+            logo_id: null,
+            primary_color: '#1e3a8a',
+            header_color: '#f8fafc',
+            accent_color: '#2563eb',
+            footer_color: '#f1f5f9',
+            footer_text: 'Merci de votre confiance. Facture payable selon les conditions convenues.',
+            show_ice: 1,
+            show_tax_id: 1,
+            show_rc: 1,
+            show_cnss: 0,
+            show_iban: 1,
+            show_phone: 1,
+            show_email: 1,
+            show_address: 1,
+            is_default: 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: 2,
+            style_key: 'style_2',
+            name: 'Style 2 — Moderne',
+            description: 'Style contemporain et épuré mettant en valeur la typographie avec bande latérale d\'accentuation.',
+            logo_id: null,
+            primary_color: '#0f172a',
+            header_color: '#ffffff',
+            accent_color: '#0d9488',
+            footer_color: '#f8fafc',
+            footer_text: 'Document officiel établi conformément aux réglementations commerciales en vigueur.',
+            show_ice: 1,
+            show_tax_id: 1,
+            show_rc: 1,
+            show_cnss: 0,
+            show_iban: 1,
+            show_phone: 1,
+            show_email: 1,
+            show_address: 1,
+            is_default: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: 3,
+            style_key: 'style_3',
+            name: 'Style 3 — Épuré',
+            description: 'Design minimaliste axé sur le contraste visuel fort et la clarté maximale des montants.',
+            logo_id: null,
+            primary_color: '#334155',
+            header_color: '#ffffff',
+            accent_color: '#ea580c',
+            footer_color: '#ffffff',
+            footer_text: 'Paiement par virement bancaire recommandé avec mention du numéro de facture.',
+            show_ice: 1,
+            show_tax_id: 1,
+            show_rc: 1,
+            show_cnss: 0,
+            show_iban: 1,
+            show_phone: 1,
+            show_email: 1,
+            show_address: 1,
+            is_default: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ];
+        this.saveInvoiceStylesToStorage();
       }
     } catch {
       // Ignore localStorage read errors in restricted contexts
@@ -797,6 +876,145 @@ class WebLocalSqliteClient implements DbClient {
       const qId = Number(bindValues[0]);
       this.quotationItems = this.quotationItems.filter((item) => Number(item.quotation_id) !== qId);
       this.saveQuotationItemsToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // INSERT INTO logos
+    if (trimmed.toUpperCase().includes("INSERT INTO LOGOS")) {
+      const newId = this.nextLogoId++;
+      const newLogo: Record<string, unknown> = {
+        id: newId,
+        name: bindValues[0] ?? "",
+        file_name: bindValues[1] ?? "logo.png",
+        file_data: bindValues[2] ?? "",
+        file_type: bindValues[3] ?? "image/png",
+        file_size: Number(bindValues[4]) || 0,
+        is_default: Number(bindValues[5]) || 0,
+        is_archived: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.logos.unshift(newLogo);
+      this.saveLogosToStorage();
+      return { rowsAffected: 1, lastInsertId: newId };
+    }
+
+    // UPDATE logos SET is_default = 0
+    if (trimmed.toUpperCase().includes("UPDATE LOGOS SET IS_DEFAULT = 0")) {
+      this.logos = this.logos.map((l) => ({ ...l, is_default: 0, updated_at: new Date().toISOString() }));
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE logos SET name = ?
+    if (trimmed.toUpperCase().includes("UPDATE LOGOS SET NAME =")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.logos = this.logos.map((l) => {
+        if (Number(l.id) === targetId) {
+          return { ...l, name: bindValues[0] ?? l.name, updated_at: new Date().toISOString() };
+        }
+        return l;
+      });
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE logos SET is_default = 1
+    if (trimmed.toUpperCase().includes("UPDATE LOGOS SET IS_DEFAULT = 1")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.logos = this.logos.map((l) => {
+        if (Number(l.id) === targetId) {
+          return { ...l, is_default: 1, updated_at: new Date().toISOString() };
+        }
+        return l;
+      });
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE logos SET is_archived = 1
+    if (trimmed.toUpperCase().includes("UPDATE LOGOS SET IS_ARCHIVED = 1")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.logos = this.logos.map((l) => {
+        if (Number(l.id) === targetId) {
+          return { ...l, is_archived: 1, is_default: 0, updated_at: new Date().toISOString() };
+        }
+        return l;
+      });
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE logos SET is_archived = 0
+    if (trimmed.toUpperCase().includes("UPDATE LOGOS SET IS_ARCHIVED = 0")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.logos = this.logos.map((l) => {
+        if (Number(l.id) === targetId) {
+          return { ...l, is_archived: 0, updated_at: new Date().toISOString() };
+        }
+        return l;
+      });
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // DELETE FROM logos WHERE id = ?
+    if (trimmed.toUpperCase().includes("DELETE FROM LOGOS WHERE ID =")) {
+      const targetId = Number(bindValues[0]);
+      this.logos = this.logos.filter((l) => Number(l.id) !== targetId);
+      this.saveLogosToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE invoice_styles SET is_default = 0
+    if (trimmed.toUpperCase().includes("UPDATE INVOICE_STYLES SET IS_DEFAULT = 0")) {
+      this.invoiceStyles = this.invoiceStyles.map((s) => ({ ...s, is_default: 0, updated_at: new Date().toISOString() }));
+      this.saveInvoiceStylesToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE invoice_styles SET is_default = 1
+    if (trimmed.toUpperCase().includes("UPDATE INVOICE_STYLES SET IS_DEFAULT = 1")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.invoiceStyles = this.invoiceStyles.map((s) => {
+        if (Number(s.id) === targetId) {
+          return { ...s, is_default: 1, updated_at: new Date().toISOString() };
+        }
+        return s;
+      });
+      this.saveInvoiceStylesToStorage();
+      return { rowsAffected: 1 };
+    }
+
+    // UPDATE invoice_styles SET ...
+    if (trimmed.toUpperCase().includes("UPDATE INVOICE_STYLES SET")) {
+      const targetId = Number(bindValues[bindValues.length - 1]);
+      this.invoiceStyles = this.invoiceStyles.map((s) => {
+        if (Number(s.id) === targetId) {
+          return {
+            ...s,
+            name: bindValues[0] ?? s.name,
+            description: bindValues[1] !== undefined ? bindValues[1] : s.description,
+            logo_id: bindValues[2] !== undefined ? bindValues[2] : s.logo_id,
+            primary_color: bindValues[3] ?? s.primary_color,
+            header_color: bindValues[4] ?? s.header_color,
+            accent_color: bindValues[5] ?? s.accent_color,
+            footer_color: bindValues[6] ?? s.footer_color,
+            footer_text: bindValues[7] !== undefined ? bindValues[7] : s.footer_text,
+            show_ice: bindValues[8] !== undefined ? Number(bindValues[8]) : s.show_ice,
+            show_tax_id: bindValues[9] !== undefined ? Number(bindValues[9]) : s.show_tax_id,
+            show_rc: bindValues[10] !== undefined ? Number(bindValues[10]) : s.show_rc,
+            show_cnss: bindValues[11] !== undefined ? Number(bindValues[11]) : s.show_cnss,
+            show_iban: bindValues[12] !== undefined ? Number(bindValues[12]) : s.show_iban,
+            show_phone: bindValues[13] !== undefined ? Number(bindValues[13]) : s.show_phone,
+            show_email: bindValues[14] !== undefined ? Number(bindValues[14]) : s.show_email,
+            show_address: bindValues[15] !== undefined ? Number(bindValues[15]) : s.show_address,
+            updated_at: new Date().toISOString(),
+          };
+        }
+        return s;
+      });
+      this.saveInvoiceStylesToStorage();
       return { rowsAffected: 1 };
     }
 
