@@ -80,10 +80,24 @@ class WebLocalSqliteClient implements DbClient {
   private logos: Array<Record<string, unknown>> = [];
   private nextLogoId = 1;
   private invoiceStyles: Array<Record<string, unknown>> = [];
+  private users: Array<Record<string, unknown>> = [];
+  private nextUserId = 1;
 
   constructor() {
     console.log("[DB Web Client] Initialized offline browser SQLite fallback adapter.");
     try {
+      const storedUsers = localStorage.getItem("fatora_users");
+      if (storedUsers) {
+        try {
+          this.users = JSON.parse(storedUsers);
+          if (this.users.length > 0) {
+            const maxId = Math.max(...this.users.map((u) => Number(u.id) || 1));
+            this.nextUserId = maxId + 1;
+          }
+        } catch {
+          this.users = [];
+        }
+      }
       const storedSettings = localStorage.getItem("fatora_company_settings");
       if (storedSettings) {
         this.companySettings = { ...this.companySettings, ...JSON.parse(storedSettings) };
@@ -364,6 +378,14 @@ class WebLocalSqliteClient implements DbClient {
     }
   }
 
+  private saveUsersToStorage() {
+    try {
+      localStorage.setItem("fatora_users", JSON.stringify(this.users));
+    } catch {
+      // Ignore
+    }
+  }
+
   async execute(query: string, bindValues: unknown[] = []): Promise<QueryResult> {
     const trimmed = query.trim();
     console.log(`[DB Web Client: EXEC] ${trimmed.slice(0, 100)}...`, bindValues);
@@ -427,6 +449,11 @@ class WebLocalSqliteClient implements DbClient {
       if (upper.includes("DELETE FROM INVOICE_STYLES")) {
         this.invoiceStyles = [];
         this.saveInvoiceStylesToStorage();
+        return { rowsAffected: 1 };
+      }
+      if (upper.includes("DELETE FROM APP_USERS")) {
+        this.users = [];
+        this.saveUsersToStorage();
         return { rowsAffected: 1 };
       }
       if (upper.includes("DELETE FROM COMPANY_SETTINGS")) {
@@ -1115,12 +1142,66 @@ class WebLocalSqliteClient implements DbClient {
       return { rowsAffected: 1 };
     }
 
+    // APP_USERS handlers
+    if (trimmed.toUpperCase().includes("INSERT INTO APP_USERS")) {
+      const newId = this.nextUserId++;
+      const newUser = {
+        id: newId,
+        username: String(bindValues[0] || ""),
+        password_hash: String(bindValues[1] || ""),
+        must_change_password: typeof bindValues[2] === "number" ? bindValues[2] : 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.users.push(newUser);
+      this.saveUsersToStorage();
+      return { rowsAffected: 1, lastInsertId: newId };
+    }
+
+    if (trimmed.toUpperCase().includes("UPDATE APP_USERS")) {
+      const targetVal = bindValues[bindValues.length - 1];
+      this.users = this.users.map((u) => {
+        const matches =
+          String(u.username).toLowerCase() === String(targetVal).toLowerCase() ||
+          Number(u.id) === Number(targetVal);
+        if (matches) {
+          const updated: Record<string, unknown> = { ...u, updated_at: new Date().toISOString() };
+          if (trimmed.toUpperCase().includes("PASSWORD_HASH =")) {
+            updated.password_hash = String(bindValues[0]);
+          }
+          if (trimmed.toUpperCase().includes("MUST_CHANGE_PASSWORD =")) {
+            const mcIdx = trimmed.toUpperCase().includes("PASSWORD_HASH =") ? 1 : 0;
+            updated.must_change_password = Number(bindValues[mcIdx]) || 0;
+          }
+          if (trimmed.toUpperCase().includes("USERNAME =")) {
+            updated.username = String(bindValues[0]);
+          }
+          return updated;
+        }
+        return u;
+      });
+      this.saveUsersToStorage();
+      return { rowsAffected: 1 };
+    }
+
     return { rowsAffected: 1 };
   }
 
   async select<T = unknown>(query: string, bindValues: unknown[] = []): Promise<T[]> {
     const trimmed = query.trim().toUpperCase();
     console.log(`[DB Web Client: SELECT] ${trimmed.slice(0, 100)}...`, bindValues);
+
+    if (trimmed.includes("FROM APP_USERS")) {
+      let filtered = [...this.users];
+      if (trimmed.includes("WHERE USERNAME =") && bindValues.length > 0) {
+        const targetName = String(bindValues[0]).toLowerCase();
+        filtered = filtered.filter((u) => String(u.username).toLowerCase() === targetName);
+      } else if (trimmed.includes("WHERE ID =") && bindValues.length > 0) {
+        const targetId = Number(bindValues[0]);
+        filtered = filtered.filter((u) => Number(u.id) === targetId);
+      }
+      return filtered as unknown as T[];
+    }
 
     if (trimmed.includes("PRAGMA FOREIGN_KEYS")) {
       return [{ foreign_keys: 1 }] as unknown as T[];

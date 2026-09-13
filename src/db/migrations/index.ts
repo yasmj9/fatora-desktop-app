@@ -10,6 +10,7 @@ import { migration008 } from "./008_quotations";
 import { migration009 } from "./009_invoice_style_customization";
 import { migration010 } from "./010_invoice_style_due_date";
 import { migration011 } from "./011_company_invoice_pattern";
+import { migration012 } from "./012_app_users";
 
 /**
  * All registered database migrations in sequential order.
@@ -26,6 +27,7 @@ export const MIGRATIONS: Migration[] = [
   migration009,
   migration010,
   migration011,
+  migration012,
 ];
 
 

@@ -20,9 +20,10 @@ import { InvoiceNumberingManager } from "../components/settings/InvoiceNumbering
 import { LogoManager } from "../components/settings/LogoManager";
 import { InvoiceStyleManager } from "../components/settings/InvoiceStyleManager";
 import { BackupRestoreManager } from "../components/settings/BackupRestoreManager";
+import { AccountSecuritySettings } from "../components/settings/AccountSecuritySettings";
 
 export const ParametresPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"company" | "numbering" | "logos" | "styles" | "backup" | "system">("company");
+  const [activeTab, setActiveTab] = useState<"company" | "numbering" | "logos" | "styles" | "backup" | "security" | "system">("company");
   const [greetName, setGreetName] = useState("");
   const [greetMsg, setGreetMsg] = useState("");
   const [isGreeting, setIsGreeting] = useState(false);
@@ -70,7 +71,7 @@ export const ParametresPage: React.FC = () => {
         </div>
 
         {/* Full-width Tab Switcher */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-slate-100 p-2 rounded-2xl border border-slate-200/80 shadow-xs w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 bg-slate-100 p-2 rounded-2xl border border-slate-200/80 shadow-xs w-full">
           <button
             type="button"
             id="tab-company-settings"
@@ -82,7 +83,7 @@ export const ParametresPage: React.FC = () => {
             }`}
           >
             <Building2 size={16} className="shrink-0" />
-            <span className="truncate">Mon Entreprise</span>
+            <span className="truncate">Entreprise</span>
           </button>
           <button
             type="button"
@@ -108,7 +109,7 @@ export const ParametresPage: React.FC = () => {
             }`}
           >
             <ImageIcon size={16} className="shrink-0" />
-            <span className="truncate">Logos & En-tête</span>
+            <span className="truncate">Logos</span>
           </button>
           <button
             type="button"
@@ -121,7 +122,7 @@ export const ParametresPage: React.FC = () => {
             }`}
           >
             <Palette size={16} className="shrink-0" />
-            <span className="truncate">Style factures</span>
+            <span className="truncate">Styles</span>
           </button>
           <button
             type="button"
@@ -135,6 +136,19 @@ export const ParametresPage: React.FC = () => {
           >
             <HardDriveDownload size={16} className="shrink-0" />
             <span className="truncate">Sauvegarde</span>
+          </button>
+          <button
+            type="button"
+            id="tab-security-settings"
+            onClick={() => setActiveTab("security")}
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "security"
+                ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            <ShieldCheck size={16} className="shrink-0 text-blue-600" />
+            <span className="truncate">Sécurité</span>
           </button>
           <button
             type="button"
@@ -170,6 +184,9 @@ export const ParametresPage: React.FC = () => {
       ) : activeTab === "backup" ? (
         /* Backup & Restore Manager Tab */
         <BackupRestoreManager onDataRestored={() => retryInit()} />
+      ) : activeTab === "security" ? (
+        /* Account Security & Password Tab */
+        <AccountSecuritySettings />
       ) : (
         /* System & Diagnostics Tab */
         <div className="space-y-6">
