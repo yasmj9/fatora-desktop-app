@@ -189,22 +189,17 @@ export const InvoiceNumberingManager: React.FC = () => {
       </div>
 
       {/* CARD 2: QUICK PRESETS */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-xs">
-        <div className="flex items-center gap-3 pb-4 mb-5 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-            <Layers size={20} />
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs">
+        <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-slate-100">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
+            <Layers size={17} />
           </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 leading-tight">
-              Modèles de numérotation prêts à l'emploi
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Sélectionnez un modèle standard en un clic selon vos besoins comptables.
-            </p>
-          </div>
+          <h3 className="text-sm font-bold text-slate-900">
+            Modèles de format
+          </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           {NUMBERING_PRESETS.map((preset) => {
             const isSelected =
               preset.pattern === pattern &&
@@ -217,26 +212,17 @@ export const InvoiceNumberingManager: React.FC = () => {
                 key={preset.id}
                 id={`preset-${preset.id}`}
                 onClick={() => handleApplyPreset(preset)}
-                className={`flex flex-col text-left p-4 rounded-2xl border transition-all cursor-pointer relative ${
+                className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border font-mono text-xs font-extrabold transition-all cursor-pointer truncate ${
                   isSelected
-                    ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-500/20 shadow-xs"
-                    : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/70"
+                    ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-500/20 shadow-xs"
+                    : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-800"
                 }`}
+                title={preset.example}
               >
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="font-mono font-extrabold text-sm text-slate-900">
-                    {preset.example}
-                  </span>
-                  {isSelected && (
-                    <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                      <CheckCircle size={13} className="stroke-[3]" />
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs font-bold text-slate-700 mb-1">{preset.name}</div>
-                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
-                  {preset.description}
-                </p>
+                <span className="truncate">{preset.example}</span>
+                {isSelected && (
+                  <CheckCircle size={14} className="text-blue-600 shrink-0 stroke-[2.5]" />
+                )}
               </button>
             );
           })}
