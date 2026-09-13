@@ -9,7 +9,7 @@ import {
   InvoiceFilterOptions,
   InvoiceStatus,
 } from "../../types/invoice";
-import { calculateInvoiceFinancials, toCents } from "../../utils/money";
+import { calculateInvoiceFinancials } from "../../utils/money";
 import { formatInvoiceNumber } from "../../utils/invoiceNumberFormatter";
 
 export interface InvoiceStats {
@@ -497,7 +497,7 @@ export const invoiceRepository = {
             itemCalc ? itemCalc.discountAmountCents : 0,
             itemInput.tax_rate !== undefined ? itemInput.tax_rate : effectiveGlobalTaxRate,
             itemCalc ? itemCalc.taxAmountCents : 0,
-            itemCalc ? itemCalc.totalCents : toCents((itemInput.quantity * itemInput.unit_price_cents) / 100),
+            itemCalc ? itemCalc.totalCents : Math.round(itemInput.quantity * itemInput.unit_price_cents),
           ]
         );
       }
@@ -729,7 +729,7 @@ export const invoiceRepository = {
             itemCalc ? itemCalc.discountAmountCents : 0,
             itemInput.tax_rate || 0,
             itemCalc ? itemCalc.taxAmountCents : 0,
-            itemCalc ? itemCalc.totalCents : toCents(itemInput.quantity * itemInput.unit_price_cents / 100),
+            itemCalc ? itemCalc.totalCents : Math.round(itemInput.quantity * itemInput.unit_price_cents),
           ]
         );
       }

@@ -21,9 +21,9 @@ import { InvoiceStyle, InvoiceStyleUpdateInput } from "../../types/invoiceStyle"
 
 // Preset Color Palettes for Quick Selection
 const COLOR_PRESETS = [
-  { name: "Jaune Sombre & Or (Défaut)", primary: "#1e293b", headerBg: "#ca8a04", headerText: "#111827", tableHeaderBg: "#1e293b", tableHeaderText: "#ffffff", footerBg: "#ca8a04", footerTextClr: "#111827", accent: "#ca8a04" },
+  { name: "Bleu Cobalt (Défaut #0047AB)", primary: "#0047AB", headerBg: "#0047AB", headerText: "#ffffff", tableHeaderBg: "#0047AB", tableHeaderText: "#ffffff", footerBg: "#0047AB", footerTextClr: "#ffffff", accent: "#0047AB" },
+  { name: "Jaune Sombre & Or", primary: "#1e293b", headerBg: "#ca8a04", headerText: "#ffffff", tableHeaderBg: "#1e293b", tableHeaderText: "#ffffff", footerBg: "#ca8a04", footerTextClr: "#ffffff", accent: "#ca8a04" },
   { name: "Ambre & Noir", primary: "#0f172a", headerBg: "#d97706", headerText: "#ffffff", tableHeaderBg: "#0f172a", tableHeaderText: "#ffffff", footerBg: "#d97706", footerTextClr: "#ffffff", accent: "#d97706" },
-  { name: "Bleu Nuit Pro", primary: "#1e3a8a", headerBg: "#1e3a8a", headerText: "#ffffff", tableHeaderBg: "#1e293b", tableHeaderText: "#ffffff", footerBg: "#1e3a8a", footerTextClr: "#ffffff", accent: "#2563eb" },
   { name: "Anthracite Minimal", primary: "#0f172a", headerBg: "#334155", headerText: "#ffffff", tableHeaderBg: "#0f172a", tableHeaderText: "#ffffff", footerBg: "#334155", footerTextClr: "#ffffff", accent: "#0d9488" },
 ];
 
@@ -55,12 +55,12 @@ export const InvoiceStyleManager: React.FC = () => {
         header_color: selectedStyle.header_color,
         accent_color: selectedStyle.accent_color,
         footer_color: selectedStyle.footer_color,
-        header_bg_color: selectedStyle.header_bg_color || "#ca8a04",
-        header_text_color: selectedStyle.header_text_color || "#111827",
-        table_header_bg_color: selectedStyle.table_header_bg_color || "#1e293b",
+        header_bg_color: selectedStyle.header_bg_color || "#0047AB",
+        header_text_color: selectedStyle.header_text_color || "#ffffff",
+        table_header_bg_color: selectedStyle.table_header_bg_color || "#0047AB",
         table_header_text_color: selectedStyle.table_header_text_color || "#ffffff",
-        footer_bg_color: selectedStyle.footer_bg_color || selectedStyle.header_bg_color || "#ca8a04",
-        footer_text_color: selectedStyle.footer_text_color || selectedStyle.header_text_color || "#111827",
+        footer_bg_color: selectedStyle.footer_bg_color || selectedStyle.header_bg_color || "#0047AB",
+        footer_text_color: selectedStyle.footer_text_color || selectedStyle.header_text_color || "#ffffff",
         footer_text: selectedStyle.footer_text,
         show_ice: selectedStyle.show_ice,
         show_tax_id: selectedStyle.show_tax_id,
@@ -108,12 +108,12 @@ export const InvoiceStyleManager: React.FC = () => {
     header_color: draftStyle.header_color || selectedStyle.header_color,
     accent_color: draftStyle.accent_color || selectedStyle.accent_color,
     footer_color: draftStyle.footer_color || selectedStyle.footer_color,
-    header_bg_color: draftStyle.header_bg_color || selectedStyle.header_bg_color || "#ca8a04",
-    header_text_color: draftStyle.header_text_color || selectedStyle.header_text_color || "#111827",
-    table_header_bg_color: draftStyle.table_header_bg_color || selectedStyle.table_header_bg_color || "#1e293b",
+    header_bg_color: draftStyle.header_bg_color || selectedStyle.header_bg_color || "#0047AB",
+    header_text_color: draftStyle.header_text_color || selectedStyle.header_text_color || "#ffffff",
+    table_header_bg_color: draftStyle.table_header_bg_color || selectedStyle.table_header_bg_color || "#0047AB",
     table_header_text_color: draftStyle.table_header_text_color || selectedStyle.table_header_text_color || "#ffffff",
-    footer_bg_color: draftStyle.footer_bg_color || selectedStyle.footer_bg_color || draftStyle.header_bg_color || "#ca8a04",
-    footer_text_color: draftStyle.footer_text_color || selectedStyle.footer_text_color || draftStyle.header_text_color || "#111827",
+    footer_bg_color: draftStyle.footer_bg_color || selectedStyle.footer_bg_color || draftStyle.header_bg_color || "#0047AB",
+    footer_text_color: draftStyle.footer_text_color || selectedStyle.footer_text_color || draftStyle.header_text_color || "#ffffff",
     footer_text: draftStyle.footer_text !== undefined ? draftStyle.footer_text : selectedStyle.footer_text,
     show_ice: draftStyle.show_ice !== undefined ? draftStyle.show_ice : selectedStyle.show_ice,
     show_tax_id: draftStyle.show_tax_id !== undefined ? draftStyle.show_tax_id : selectedStyle.show_tax_id,
@@ -284,13 +284,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.primary_color || "#1e3a8a"}
+                    value={draftStyle.primary_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, primary_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.primary_color || "#1e3a8a"}
+                    value={draftStyle.primary_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, primary_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -304,13 +304,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.accent_color || "#2563eb"}
+                    value={draftStyle.accent_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, accent_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.accent_color || "#2563eb"}
+                    value={draftStyle.accent_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, accent_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -324,13 +324,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.header_bg_color || "#facc15"}
+                    value={draftStyle.header_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_bg_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.header_bg_color || "#facc15"}
+                    value={draftStyle.header_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_bg_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -344,13 +344,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.header_text_color || "#111827"}
+                    value={draftStyle.header_text_color || "#ffffff"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_text_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.header_text_color || "#111827"}
+                    value={draftStyle.header_text_color || "#ffffff"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_text_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -364,13 +364,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.table_header_bg_color || "#1e293b"}
+                    value={draftStyle.table_header_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_bg_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.table_header_bg_color || "#1e293b"}
+                    value={draftStyle.table_header_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_bg_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -404,13 +404,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.footer_bg_color || "#ffffff"}
+                    value={draftStyle.footer_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_bg_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.footer_bg_color || "#ffffff"}
+                    value={draftStyle.footer_bg_color || "#0047AB"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_bg_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
@@ -424,13 +424,13 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.footer_text_color || "#334155"}
+                    value={draftStyle.footer_text_color || "#ffffff"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_text_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.footer_text_color || "#334155"}
+                    value={draftStyle.footer_text_color || "#ffffff"}
                     onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_text_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />

@@ -45,8 +45,11 @@ export const Style3Epure: React.FC<StyleLayoutProps> = ({ documentData }) => {
     >
       {/* Bold Top Header Bar */}
       <div
-        className="p-6 rounded-xl text-white flex flex-col sm:flex-row justify-between items-start gap-4"
-        style={{ backgroundColor: style.primary_color || "#334155" }}
+        className="p-6 rounded-xl flex flex-col sm:flex-row justify-between items-start gap-4"
+        style={{
+          backgroundColor: style.header_bg_color || style.primary_color || "#0047AB",
+          color: style.header_text_color || "#ffffff",
+        }}
       >
         <div className="space-y-2">
           {company.logoDataUrl ? (
@@ -146,13 +149,13 @@ export const Style3Epure: React.FC<StyleLayoutProps> = ({ documentData }) => {
       </div>
 
       {/* Table */}
-      <table className="w-full">
+      <table className="w-full overflow-hidden rounded-lg">
         <thead>
           <tr
-            className="border-b-2 text-[10px] font-black uppercase tracking-wider"
+            className="text-[10px] font-black uppercase tracking-wider"
             style={{
-              borderColor: style.accent_color || "#ea580c",
-              color: style.accent_color || "#ea580c",
+              backgroundColor: style.table_header_bg_color || "#0047AB",
+              color: style.table_header_text_color || "#ffffff",
             }}
           >
             <th className={`py-2 pb-3 ${isRtl ? "text-right" : "text-left"}`}>
@@ -178,10 +181,10 @@ export const Style3Epure: React.FC<StyleLayoutProps> = ({ documentData }) => {
               </td>
               <td className="py-3 text-center font-mono">{item.quantity}</td>
               <td className={`py-3 font-mono ${isRtl ? "text-left" : "text-right"}`}>
-                {formatMoney(item.unitPriceCents, currency, false)}
+                {formatMoney(item.unitPriceCents, currency, true)}
               </td>
               <td className={`py-3 font-mono font-bold text-slate-900 ${isRtl ? "text-left" : "text-right"}`}>
-                {formatMoney(item.totalCents, currency, false)}
+                {formatMoney(item.totalCents, currency, true)}
               </td>
             </tr>
           ))}
@@ -285,7 +288,13 @@ export const Style3Epure: React.FC<StyleLayoutProps> = ({ documentData }) => {
       )}
 
       {/* Footer Text */}
-      <div className="pt-4 border-t border-slate-100 text-center text-[10px] font-medium text-slate-500">
+      <div
+        className="p-3 rounded-xl text-center text-[10px] font-medium"
+        style={{
+          backgroundColor: style.footer_bg_color || style.footer_color || "#0047AB",
+          color: style.footer_text_color || "#ffffff",
+        }}
+      >
         {style.footer_text || "Merci de votre confiance."}
       </div>
     </div>

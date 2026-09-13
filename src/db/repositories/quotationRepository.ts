@@ -10,7 +10,7 @@ import {
   QuotationStatus,
 } from "../../types/quotation";
 import { Invoice } from "../../types/invoice";
-import { calculateInvoiceFinancials, toCents } from "../../utils/money";
+import { calculateInvoiceFinancials } from "../../utils/money";
 
 export const quotationRepository = {
   /**
@@ -423,7 +423,7 @@ export const quotationRepository = {
             itemCalc ? itemCalc.discountAmountCents : 0,
             itemInput.tax_rate || 0,
             itemCalc ? itemCalc.taxAmountCents : 0,
-            itemCalc ? itemCalc.totalCents : toCents((itemInput.quantity * itemInput.unit_price_cents) / 100),
+            itemCalc ? itemCalc.totalCents : Math.round(itemInput.quantity * itemInput.unit_price_cents),
           ]
         );
       }

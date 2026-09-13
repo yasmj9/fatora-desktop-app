@@ -45,8 +45,8 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
     >
       {/* Accent Top Banner */}
       <div
-        className="h-2 w-full"
-        style={{ backgroundColor: style.accent_color || "#0d9488" }}
+        className="h-2.5 w-full"
+        style={{ backgroundColor: style.header_bg_color || style.accent_color || "#0047AB" }}
       />
 
       <div className="p-6 sm:p-8 space-y-6">
@@ -163,7 +163,13 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
         {/* Line Items Table */}
         <div className="overflow-hidden rounded-xl border border-slate-100">
           <table className="w-full">
-            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-200">
+            <thead
+              className="font-bold text-[10px] uppercase tracking-wider border-b border-slate-200"
+              style={{
+                backgroundColor: style.table_header_bg_color || "#0047AB",
+                color: style.table_header_text_color || "#ffffff",
+              }}
+            >
               <tr>
                 <th className={`py-3 px-4 ${isRtl ? "text-right" : "text-left"}`}>
                   {labels.description}
@@ -189,10 +195,10 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
                   </td>
                   <td className="py-3 px-4 text-center font-mono">{item.quantity}</td>
                   <td className={`py-3 px-4 font-mono ${isRtl ? "text-left" : "text-right"}`}>
-                    {formatMoney(item.unitPriceCents, currency, false)}
+                    {formatMoney(item.unitPriceCents, currency, true)}
                   </td>
                   <td className={`py-3 px-4 font-mono font-bold text-slate-900 ${isRtl ? "text-left" : "text-right"}`}>
-                    {formatMoney(item.totalCents, currency, false)}
+                    {formatMoney(item.totalCents, currency, true)}
                   </td>
                 </tr>
               ))}
@@ -305,8 +311,8 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
         <div
           className="p-3 rounded-xl text-center text-[10px] font-medium"
           style={{
-            backgroundColor: style.footer_color || "#f8fafc",
-            color: "#475569",
+            backgroundColor: style.footer_bg_color || style.footer_color || "#0047AB",
+            color: style.footer_text_color || "#ffffff",
           }}
         >
           {style.footer_text || "Merci de votre confiance."}

@@ -9,34 +9,34 @@ export const migration009: Migration = {
     const columns = new Set(tableInfo.map((col: any) => col.name));
 
     if (!columns.has("header_bg_color")) {
-      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN header_bg_color TEXT NOT NULL DEFAULT '#facc15';`);
+      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN header_bg_color TEXT NOT NULL DEFAULT '#0047AB';`);
     }
     if (!columns.has("header_text_color")) {
-      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN header_text_color TEXT NOT NULL DEFAULT '#111827';`);
+      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN header_text_color TEXT NOT NULL DEFAULT '#ffffff';`);
     }
     if (!columns.has("table_header_bg_color")) {
-      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN table_header_bg_color TEXT NOT NULL DEFAULT '#1e293b';`);
+      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN table_header_bg_color TEXT NOT NULL DEFAULT '#0047AB';`);
     }
     if (!columns.has("table_header_text_color")) {
       await db.execute(`ALTER TABLE invoice_styles ADD COLUMN table_header_text_color TEXT NOT NULL DEFAULT '#ffffff';`);
     }
     if (!columns.has("footer_bg_color")) {
-      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN footer_bg_color TEXT NOT NULL DEFAULT '#ffffff';`);
+      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN footer_bg_color TEXT NOT NULL DEFAULT '#0047AB';`);
     }
     if (!columns.has("footer_text_color")) {
-      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN footer_text_color TEXT NOT NULL DEFAULT '#334155';`);
+      await db.execute(`ALTER TABLE invoice_styles ADD COLUMN footer_text_color TEXT NOT NULL DEFAULT '#ffffff';`);
     }
 
     // Update existing records with professional default colors matching the user request
     await db.execute(`
       UPDATE invoice_styles SET
-        header_bg_color = '#facc15',
-        header_text_color = '#111827',
-        table_header_bg_color = '#1e293b',
+        header_bg_color = '#0047AB',
+        header_text_color = '#ffffff',
+        table_header_bg_color = '#0047AB',
         table_header_text_color = '#ffffff',
-        footer_bg_color = '#ffffff',
-        footer_text_color = '#334155',
-        footer_text = 'Please send payment within 30 days of receiving this invoice.'
+        footer_bg_color = '#0047AB',
+        footer_text_color = '#ffffff',
+        footer_text = 'Merci de votre confiance.'
       WHERE id = 1 OR is_default = 1;
     `);
   },

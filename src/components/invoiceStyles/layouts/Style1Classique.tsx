@@ -37,14 +37,14 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
     : paymentTerms || (language === "ar" ? "تحويل بنكي" : language === "en" ? "Bank Transfer" : "Virement bancaire");
   const paymentRefDisplay = primaryPayment?.reference || `#${documentNumber}`;
 
-  // Header and Footer background colors (default dark yellow / amber)
-  const headerBg = style.header_bg_color || "#ca8a04";
-  const headerText = style.header_text_color || "#111827";
-  const tableHeaderBg = style.table_header_bg_color || "#1e293b";
+  // Header and Footer background colors (default #0047AB blue & white text)
+  const headerBg = style.header_bg_color || "#0047AB";
+  const headerText = style.header_text_color || "#ffffff";
+  const tableHeaderBg = style.table_header_bg_color || "#0047AB";
   const tableHeaderText = style.table_header_text_color || "#ffffff";
-  const footerBg = style.footer_bg_color || headerBg;
-  const footerTextClr = style.footer_text_color || headerText;
-  const accentColor = style.accent_color || "#ca8a04";
+  const footerBg = style.footer_bg_color || headerBg || "#0047AB";
+  const footerTextClr = style.footer_text_color || "#ffffff";
+  const accentColor = style.accent_color || "#0047AB";
 
   return (
     <div
@@ -290,7 +290,7 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
                       className={`py-3 px-4 font-mono ${isRtl ? "text-left" : "text-right"}`}
                       style={{ color: "#334155" }}
                     >
-                      {formatMoney(item.unitPriceCents, currency, false)}
+                      {formatMoney(item.unitPriceCents, currency, true)}
                     </td>
                     <td
                       className="py-3 px-4 text-center font-mono font-bold"
@@ -302,7 +302,7 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
                       className={`py-3 px-4 font-mono font-bold ${isRtl ? "text-left" : "text-right"}`}
                       style={{ color: "#0f172a" }}
                     >
-                      {formatMoney(item.totalCents, currency, false)}
+                      {formatMoney(item.totalCents, currency, true)}
                     </td>
                   </tr>
                 ))}
