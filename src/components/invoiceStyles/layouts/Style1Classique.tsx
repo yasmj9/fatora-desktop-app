@@ -1,6 +1,6 @@
 import React from "react";
 import { DocumentData } from "../../../types/documentData";
-import { DOCUMENT_TRANSLATIONS } from "../../../utils/documentTranslations";
+import { DOCUMENT_TRANSLATIONS, getPaymentMethodLabel } from "../../../utils/documentTranslations";
 import { formatMoney } from "../../../utils/money";
 
 interface StyleLayoutProps {
@@ -22,11 +22,20 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
     taxRate,
     taxAmountCents,
     totalCents,
+    payments,
+    paymentTerms,
     style,
   } = documentData;
 
   const isRtl = language === "ar";
   const labels = DOCUMENT_TRANSLATIONS[language] || DOCUMENT_TRANSLATIONS.fr;
+
+  // Resolve payment mode and reference
+  const primaryPayment = payments && payments.length > 0 ? payments[0] : null;
+  const paymentMethodDisplay = primaryPayment
+    ? getPaymentMethodLabel(primaryPayment.method, language)
+    : paymentTerms || (language === "ar" ? "تحويل بنكي" : language === "en" ? "Bank Transfer" : "Virement bancaire");
+  const paymentRefDisplay = primaryPayment?.reference || `#${documentNumber}`;
 
   // Header and Footer background colors (default dark yellow / amber)
   const headerBg = style.header_bg_color || "#ca8a04";
@@ -363,16 +372,18 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
 
           {/* SECTION 5: LOWER GRID (REF OF PAYMENT ON LEFT, SIGNATURE ON RIGHT) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 mt-auto items-end">
-            {/* LEFT: Reference of payment / Bank details & notes */}
+            {/* LEFT: Reference of payment / Payment details */}
             <div
-              className="space-y-2 p-4 rounded-xl border"
+              className="space-y-2.5 p-4 rounded-xl border"
               style={{
                 backgroundColor: "#f8fafc",
                 borderColor: "#e2e8f0",
+                breakInside: "avoid",
+                pageBreakInside: "avoid",
               }}
             >
               <div
-                className="text-[10px] font-extrabold uppercase tracking-wider pb-1 border-b"
+                className="text-[10px] font-extrabold uppercase tracking-wider pb-1.5 border-b"
                 style={{
                   color: accentColor,
                   borderColor: "#e2e8f0",
@@ -380,52 +391,50 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
               >
                 {labels.bankDetails}
               </div>
-              
-              {style.show_iban && company.ribIban ? (
-                <div className="text-[11px] font-mono space-y-1" style={{ color: "#334155" }}>
-                  {company.bankName && (
-                    <div className="font-bold" style={{ color: "#0f172a" }}>{company.bankName}</div>
-                  )}
-                  <div
-                    className="p-2 rounded border text-xs font-bold"
-                    style={{
-                      backgroundColor: "#ffffff",
-                      borderColor: "#cbd5e1",
-                      color: "#0f172a",
-                    }}
-                  >
-                    {company.ribIban}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-[11px] italic" style={{ color: "#64748b" }}>
-                  Paiement selon les conditions convenues.
-                </div>
-              )}
 
-              {style.footer_text && (
-                <p className="text-[10px] pt-1 leading-relaxed" style={{ color: "#64748b" }}>
-                  {style.footer_text}
-                </p>
-              )}
+              <div className="space-y-2 text-[11px]" style={{ color: "#334155" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">{labels.paymentMethod} :</span>
+                  <span className="font-bold text-slate-800">{paymentMethodDisplay}</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">{labels.reference} :</span>
+                  <span className="font-mono font-bold text-slate-800">{paymentRefDisplay}</span>
+                </div>
+
+                {style.show_iban && company.ribIban && (
+                  <div className="pt-1.5 space-y-1">
+                    {company.bankName && (
+                      <div className="font-bold text-slate-700 text-[10px]">{company.bankName}</div>
+                    )}
+                    <div
+                      className="p-2 rounded-lg border font-mono text-[11px] font-bold"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        borderColor: "#cbd5e1",
+                        color: "#0f172a",
+                      }}
+                    >
+                      {company.ribIban}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* RIGHT: Signature Section */}
-            <div className="flex flex-col items-center sm:items-end text-center sm:text-right space-y-3 p-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+            <div
+              className={`flex flex-col ${isRtl ? "items-start text-left" : "items-end text-right"} p-4 space-y-2`}
+              style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+            >
+              <div
+                className="text-xs font-black uppercase tracking-widest"
+                style={{ color: "#475569" }}
+              >
                 {labels.signature}
               </div>
-              <div
-                className="h-16 w-48 border-b-2 border-dashed flex items-end justify-center pb-1"
-                style={{ borderColor: "#94a3b8" }}
-              >
-                <span className="text-[10px] font-serif italic" style={{ color: "#94a3b8" }}>
-                  Cachet & Signature
-                </span>
-              </div>
-              <div className="text-[10px] font-bold" style={{ color: "#334155" }}>
-                {company.name}
-              </div>
+              <div className="h-16 w-44" />
             </div>
           </div>
         </div>
