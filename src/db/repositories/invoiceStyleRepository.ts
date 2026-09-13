@@ -11,6 +11,12 @@ interface RawInvoiceStyleRow {
   header_color: string;
   accent_color: string;
   footer_color: string;
+  header_bg_color: string;
+  header_text_color: string;
+  table_header_bg_color: string;
+  table_header_text_color: string;
+  footer_bg_color: string;
+  footer_text_color: string;
   footer_text: string;
   show_ice: number;
   show_tax_id: number;
@@ -20,6 +26,7 @@ interface RawInvoiceStyleRow {
   show_phone: number;
   show_email: number;
   show_address: number;
+  show_due_date: number;
   is_default: number;
   created_at: string;
   updated_at: string;
@@ -37,6 +44,7 @@ function mapRowToStyle(row: RawInvoiceStyleRow): InvoiceStyle {
     show_phone: Boolean(row.show_phone),
     show_email: Boolean(row.show_email),
     show_address: Boolean(row.show_address),
+    show_due_date: Boolean(row.show_due_date),
     is_default: Boolean(row.is_default),
   };
 }
@@ -139,6 +147,12 @@ export const invoiceStyleRepository = {
     const updatedHeader = input.header_color || existing.header_color;
     const updatedAccent = input.accent_color || existing.accent_color;
     const updatedFooterColor = input.footer_color || existing.footer_color;
+    const updatedHeaderBg = input.header_bg_color || existing.header_bg_color;
+    const updatedHeaderText = input.header_text_color || existing.header_text_color;
+    const updatedTableHeaderBg = input.table_header_bg_color || existing.table_header_bg_color;
+    const updatedTableHeaderText = input.table_header_text_color || existing.table_header_text_color;
+    const updatedFooterBg = input.footer_bg_color || existing.footer_bg_color;
+    const updatedFooterTextClr = input.footer_text_color || existing.footer_text_color;
     const updatedFooterText = input.footer_text !== undefined ? input.footer_text : existing.footer_text;
 
     const showIce = input.show_ice !== undefined ? (input.show_ice ? 1 : 0) : (existing.show_ice ? 1 : 0);
@@ -149,6 +163,7 @@ export const invoiceStyleRepository = {
     const showPhone = input.show_phone !== undefined ? (input.show_phone ? 1 : 0) : (existing.show_phone ? 1 : 0);
     const showEmail = input.show_email !== undefined ? (input.show_email ? 1 : 0) : (existing.show_email ? 1 : 0);
     const showAddress = input.show_address !== undefined ? (input.show_address ? 1 : 0) : (existing.show_address ? 1 : 0);
+    const showDueDate = input.show_due_date !== undefined ? (input.show_due_date ? 1 : 0) : (existing.show_due_date ? 1 : 0);
 
     await db.execute(
       `
@@ -160,6 +175,12 @@ export const invoiceStyleRepository = {
         header_color = ?,
         accent_color = ?,
         footer_color = ?,
+        header_bg_color = ?,
+        header_text_color = ?,
+        table_header_bg_color = ?,
+        table_header_text_color = ?,
+        footer_bg_color = ?,
+        footer_text_color = ?,
         footer_text = ?,
         show_ice = ?,
         show_tax_id = ?,
@@ -169,6 +190,7 @@ export const invoiceStyleRepository = {
         show_phone = ?,
         show_email = ?,
         show_address = ?,
+        show_due_date = ?,
         updated_at = datetime('now')
       WHERE id = ?
       `,
@@ -180,6 +202,12 @@ export const invoiceStyleRepository = {
         updatedHeader,
         updatedAccent,
         updatedFooterColor,
+        updatedHeaderBg,
+        updatedHeaderText,
+        updatedTableHeaderBg,
+        updatedTableHeaderText,
+        updatedFooterBg,
+        updatedFooterTextClr,
         updatedFooterText,
         showIce,
         showTaxId,
@@ -189,6 +217,7 @@ export const invoiceStyleRepository = {
         showPhone,
         showEmail,
         showAddress,
+        showDueDate,
         id,
       ]
     );
@@ -249,6 +278,12 @@ export const invoiceStyleRepository = {
         header_color,
         accent_color,
         footer_color,
+        header_bg_color,
+        header_text_color,
+        table_header_bg_color,
+        table_header_text_color,
+        footer_bg_color,
+        footer_text_color,
         footer_text,
         show_ice,
         show_tax_id,
@@ -258,10 +293,11 @@ export const invoiceStyleRepository = {
         show_phone,
         show_email,
         show_address,
+        show_due_date,
         is_default,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
       `,
       [
         input.style_key,
@@ -272,7 +308,13 @@ export const invoiceStyleRepository = {
         input.header_color || "#f8fafc",
         input.accent_color || "#2563eb",
         input.footer_color || "#f1f5f9",
-        input.footer_text || "Merci de votre confiance.",
+        input.header_bg_color || "#facc15",
+        input.header_text_color || "#111827",
+        input.table_header_bg_color || "#1e293b",
+        input.table_header_text_color || "#ffffff",
+        input.footer_bg_color || "#ffffff",
+        input.footer_text_color || "#334155",
+        input.footer_text || "Please send payment within 30 days of receiving this invoice.",
         input.show_ice !== false ? 1 : 0,
         input.show_tax_id !== false ? 1 : 0,
         input.show_rc !== false ? 1 : 0,
@@ -281,6 +323,7 @@ export const invoiceStyleRepository = {
         input.show_phone !== false ? 1 : 0,
         input.show_email !== false ? 1 : 0,
         input.show_address !== false ? 1 : 0,
+        input.show_due_date !== false ? 1 : 0,
         input.is_default ? 1 : 0,
       ]
     );

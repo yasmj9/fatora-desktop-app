@@ -3,8 +3,6 @@ import { InvoiceStyle } from "../../types/invoiceStyle";
 import { CompanySettings } from "../../types/company";
 import { DocumentData } from "../../types/documentData";
 import { Style1Classique } from "./layouts/Style1Classique";
-import { Style2Moderne } from "./layouts/Style2Moderne";
-import { Style3Epure } from "./layouts/Style3Epure";
 import { sampleCompany, sampleInvoiceData } from "./sampleData";
 
 interface StyleRendererProps {
@@ -17,8 +15,7 @@ interface StyleRendererProps {
 
 /**
  * Master Registry Component for Invoice Styles.
- * Decouples document data from visual rendering.
- * Consumes DocumentData and delegates rendering to specific visual layout components.
+ * Standardized on the single primary invoice layout.
  */
 export const StyleRenderer: React.FC<StyleRendererProps> = ({
   documentData,
@@ -91,16 +88,7 @@ export const StyleRenderer: React.FC<StyleRendererProps> = ({
     throw new Error("StyleRenderer requires either documentData or style prop.");
   }
 
-  const key = docData.style.style_key;
-
-  switch (key) {
-    case "style_1":
-      return <Style1Classique documentData={docData} />;
-    case "style_2":
-      return <Style2Moderne documentData={docData} />;
-    case "style_3":
-      return <Style3Epure documentData={docData} />;
-    default:
-      return <Style1Classique documentData={docData} />;
-  }
+  // Unified single layout
+  return <Style1Classique documentData={docData} />;
 };
+

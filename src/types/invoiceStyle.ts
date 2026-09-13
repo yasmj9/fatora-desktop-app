@@ -1,4 +1,4 @@
-export type InvoiceStyleKey = "style_1" | "style_2" | "style_3" | string;
+export type InvoiceStyleKey = "style_1" | string;
 
 export interface InvoiceStyle {
   id: number;
@@ -10,6 +10,12 @@ export interface InvoiceStyle {
   header_color: string;
   accent_color: string;
   footer_color: string;
+  header_bg_color: string;
+  header_text_color: string;
+  table_header_bg_color: string;
+  table_header_text_color: string;
+  footer_bg_color: string;
+  footer_text_color: string;
   footer_text: string;
   show_ice: boolean;
   show_tax_id: boolean;
@@ -19,6 +25,7 @@ export interface InvoiceStyle {
   show_phone: boolean;
   show_email: boolean;
   show_address: boolean;
+  show_due_date: boolean;
   is_default: boolean;
   created_at: string;
   updated_at: string;
@@ -32,6 +39,12 @@ export interface InvoiceStyleUpdateInput {
   header_color?: string;
   accent_color?: string;
   footer_color?: string;
+  header_bg_color?: string;
+  header_text_color?: string;
+  table_header_bg_color?: string;
+  table_header_text_color?: string;
+  footer_bg_color?: string;
+  footer_text_color?: string;
   footer_text?: string;
   show_ice?: boolean;
   show_tax_id?: boolean;
@@ -41,6 +54,7 @@ export interface InvoiceStyleUpdateInput {
   show_phone?: boolean;
   show_email?: boolean;
   show_address?: boolean;
+  show_due_date?: boolean;
   is_default?: boolean;
 }
 
@@ -53,6 +67,12 @@ export interface InvoiceStyleCreateInput {
   header_color?: string;
   accent_color?: string;
   footer_color?: string;
+  header_bg_color?: string;
+  header_text_color?: string;
+  table_header_bg_color?: string;
+  table_header_text_color?: string;
+  footer_bg_color?: string;
+  footer_text_color?: string;
   footer_text?: string;
   show_ice?: boolean;
   show_tax_id?: boolean;
@@ -62,5 +82,6 @@ export interface InvoiceStyleCreateInput {
   show_phone?: boolean;
   show_email?: boolean;
   show_address?: boolean;
+  show_due_date?: boolean;
   is_default?: boolean;
 }

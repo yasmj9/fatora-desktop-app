@@ -34,6 +34,7 @@ export interface DocumentLabels {
   statusPartiallyPaid: string;
   statusUnpaid: string;
   statusCancelled: string;
+  signature: string;
 }
 
 export const DOCUMENT_TRANSLATIONS: Record<DocumentLanguage, DocumentLabels> = {
@@ -71,6 +72,7 @@ export const DOCUMENT_TRANSLATIONS: Record<DocumentLanguage, DocumentLabels> = {
     statusPartiallyPaid: "Partiellement payée",
     statusUnpaid: "Non payée",
     statusCancelled: "Annulée",
+    signature: "Signature",
   },
   en: {
     invoiceTitle: "INVOICE",
@@ -106,6 +108,7 @@ export const DOCUMENT_TRANSLATIONS: Record<DocumentLanguage, DocumentLabels> = {
     statusPartiallyPaid: "Partially Paid",
     statusUnpaid: "Unpaid",
     statusCancelled: "Cancelled",
+    signature: "Signature",
   },
   ar: {
     invoiceTitle: "فاتـورة",
@@ -141,6 +144,7 @@ export const DOCUMENT_TRANSLATIONS: Record<DocumentLanguage, DocumentLabels> = {
     statusPartiallyPaid: "مدفوعة جزئياً",
     statusUnpaid: "غير مدفوعة",
     statusCancelled: "ملغاة",
+    signature: "التوقيع",
   },
 };
 

@@ -21,25 +21,20 @@ import { InvoiceStyle, InvoiceStyleUpdateInput } from "../../types/invoiceStyle"
 
 // Preset Color Palettes for Quick Selection
 const COLOR_PRESETS = [
-  { name: "Bleu Institutionnel", primary: "#1e3a8a", header: "#f8fafc", accent: "#2563eb", footer: "#f1f5f9" },
-  { name: "Émeraude Moderne", primary: "#065f46", header: "#f0fdf4", accent: "#059669", footer: "#ecfdf5" },
-  { name: "Anthracite Épuré", primary: "#0f172a", header: "#ffffff", accent: "#0d9488", footer: "#f8fafc" },
-  { name: "Bordeau Prestige", primary: "#831843", header: "#fdf2f8", accent: "#db2777", footer: "#fce7f3" },
-  { name: "Sable & Bronze", primary: "#78350f", header: "#fffbeb", accent: "#d97706", footer: "#fef3c7" },
+  { name: "Jaune Sombre & Or (Défaut)", primary: "#1e293b", headerBg: "#ca8a04", headerText: "#111827", tableHeaderBg: "#1e293b", tableHeaderText: "#ffffff", footerBg: "#ca8a04", footerTextClr: "#111827", accent: "#ca8a04" },
+  { name: "Ambre & Noir", primary: "#0f172a", headerBg: "#d97706", headerText: "#ffffff", tableHeaderBg: "#0f172a", tableHeaderText: "#ffffff", footerBg: "#d97706", footerTextClr: "#ffffff", accent: "#d97706" },
+  { name: "Bleu Nuit Pro", primary: "#1e3a8a", headerBg: "#1e3a8a", headerText: "#ffffff", tableHeaderBg: "#1e293b", tableHeaderText: "#ffffff", footerBg: "#1e3a8a", footerTextClr: "#ffffff", accent: "#2563eb" },
+  { name: "Anthracite Minimal", primary: "#0f172a", headerBg: "#334155", headerText: "#ffffff", tableHeaderBg: "#0f172a", tableHeaderText: "#ffffff", footerBg: "#334155", footerTextClr: "#ffffff", accent: "#0d9488" },
 ];
 
 export const InvoiceStyleManager: React.FC = () => {
   const {
-    styles,
-    defaultStyle,
     selectedStyle,
-    setSelectedStyle,
     isLoading,
     isSaving,
     error,
     successMessage,
     updateStyleConfig,
-    setDefaultStyle,
     clearMessages,
   } = useInvoiceStyles();
 
@@ -60,6 +55,12 @@ export const InvoiceStyleManager: React.FC = () => {
         header_color: selectedStyle.header_color,
         accent_color: selectedStyle.accent_color,
         footer_color: selectedStyle.footer_color,
+        header_bg_color: selectedStyle.header_bg_color || "#ca8a04",
+        header_text_color: selectedStyle.header_text_color || "#111827",
+        table_header_bg_color: selectedStyle.table_header_bg_color || "#1e293b",
+        table_header_text_color: selectedStyle.table_header_text_color || "#ffffff",
+        footer_bg_color: selectedStyle.footer_bg_color || selectedStyle.header_bg_color || "#ca8a04",
+        footer_text_color: selectedStyle.footer_text_color || selectedStyle.header_text_color || "#111827",
         footer_text: selectedStyle.footer_text,
         show_ice: selectedStyle.show_ice,
         show_tax_id: selectedStyle.show_tax_id,
@@ -69,6 +70,7 @@ export const InvoiceStyleManager: React.FC = () => {
         show_phone: selectedStyle.show_phone,
         show_email: selectedStyle.show_email,
         show_address: selectedStyle.show_address,
+        show_due_date: selectedStyle.show_due_date !== undefined ? selectedStyle.show_due_date : true,
       });
     }
   }, [selectedStyle]);
@@ -92,7 +94,7 @@ export const InvoiceStyleManager: React.FC = () => {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
         <Loader2 size={32} className="animate-spin text-blue-600 mx-auto mb-3" />
-        <p className="text-xs text-slate-500 font-medium">Chargement des styles de factures...</p>
+        <p className="text-xs text-slate-500 font-medium">Chargement du modèle de facture...</p>
       </div>
     );
   }
@@ -106,6 +108,12 @@ export const InvoiceStyleManager: React.FC = () => {
     header_color: draftStyle.header_color || selectedStyle.header_color,
     accent_color: draftStyle.accent_color || selectedStyle.accent_color,
     footer_color: draftStyle.footer_color || selectedStyle.footer_color,
+    header_bg_color: draftStyle.header_bg_color || selectedStyle.header_bg_color || "#ca8a04",
+    header_text_color: draftStyle.header_text_color || selectedStyle.header_text_color || "#111827",
+    table_header_bg_color: draftStyle.table_header_bg_color || selectedStyle.table_header_bg_color || "#1e293b",
+    table_header_text_color: draftStyle.table_header_text_color || selectedStyle.table_header_text_color || "#ffffff",
+    footer_bg_color: draftStyle.footer_bg_color || selectedStyle.footer_bg_color || draftStyle.header_bg_color || "#ca8a04",
+    footer_text_color: draftStyle.footer_text_color || selectedStyle.footer_text_color || draftStyle.header_text_color || "#111827",
     footer_text: draftStyle.footer_text !== undefined ? draftStyle.footer_text : selectedStyle.footer_text,
     show_ice: draftStyle.show_ice !== undefined ? draftStyle.show_ice : selectedStyle.show_ice,
     show_tax_id: draftStyle.show_tax_id !== undefined ? draftStyle.show_tax_id : selectedStyle.show_tax_id,
@@ -115,15 +123,20 @@ export const InvoiceStyleManager: React.FC = () => {
     show_phone: draftStyle.show_phone !== undefined ? draftStyle.show_phone : selectedStyle.show_phone,
     show_email: draftStyle.show_email !== undefined ? draftStyle.show_email : selectedStyle.show_email,
     show_address: draftStyle.show_address !== undefined ? draftStyle.show_address : selectedStyle.show_address,
+    show_due_date: draftStyle.show_due_date !== undefined ? draftStyle.show_due_date : selectedStyle.show_due_date,
   };
 
   const handleApplyPreset = (preset: (typeof COLOR_PRESETS)[0]) => {
     setDraftStyle((prev) => ({
       ...prev,
       primary_color: preset.primary,
-      header_color: preset.header,
+      header_bg_color: preset.headerBg,
+      header_text_color: preset.headerText,
+      table_header_bg_color: preset.tableHeaderBg,
+      table_header_text_color: preset.tableHeaderText,
+      footer_bg_color: preset.footerBg,
+      footer_text_color: preset.footerTextClr,
       accent_color: preset.accent,
-      footer_color: preset.footer,
     }));
   };
 
@@ -136,109 +149,28 @@ export const InvoiceStyleManager: React.FC = () => {
     }
   };
 
-  const handleSetDefault = async () => {
-    clearMessages();
-    try {
-      await setDefaultStyle(selectedStyle.id);
-    } catch {
-      // Error handled by hook
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200">
               <Palette size={24} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-slate-900">Style des factures</h3>
-                {defaultStyle && (
-                  <span className="text-xs bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200 flex items-center gap-1">
-                    <Star size={12} className="fill-emerald-600 text-emerald-600" />
-                    Style par défaut : {defaultStyle.name}
-                  </span>
-                )}
+                <h3 className="text-lg font-bold text-slate-900">Modèle et style de facture</h3>
+                <span className="text-xs bg-amber-50 text-amber-900 px-2.5 py-0.5 rounded-full font-bold border border-amber-200 flex items-center gap-1">
+                  <Star size={12} className="fill-amber-600 text-amber-600" />
+                  Modèle officiel actif
+                </span>
               </div>
               <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                Personnalisez la présentation visuelle de vos devis et factures (couleurs, disposition du logo, mentions légales et pied de page).
+                Personnalisez la présentation visuelle de vos devis et factures (bandeau supérieur, couleurs, coordonnées d'entreprise, coordonnées bancaires et pied de page).
               </p>
             </div>
           </div>
-
-          {!selectedStyle.is_default && (
-            <button
-              type="button"
-              id="btn-set-default-style"
-              onClick={handleSetDefault}
-              disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-xl text-xs border border-emerald-200 transition-colors cursor-pointer shrink-0"
-            >
-              <Star size={16} className="fill-emerald-600 text-emerald-600" />
-              <span>Définir comme style par défaut</span>
-            </button>
-          )}
-        </div>
-
-        {/* Style Selection Cards / Tabs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-6 border-t border-slate-100 mt-5">
-          {styles.map((st, idx) => {
-            const isSelected = selectedStyle.id === st.id;
-            return (
-              <button
-                key={st.id ?? st.style_key ?? idx}
-                type="button"
-                onClick={() => {
-                  clearMessages();
-                  setSelectedStyle(st);
-                }}
-                className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer ${
-                  isSelected
-                    ? "bg-indigo-50/50 border-indigo-600 ring-2 ring-indigo-500/20 shadow-xs"
-                    : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-slate-900 text-sm">{st.name}</h4>
-                    {st.is_default && (
-                      <span className="p-1 text-emerald-600" title="Style par défaut">
-                        <Star size={16} className="fill-emerald-600" />
-                      </span>
-                    )}
-                  </div>
-                  {st.description && (
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{st.description}</p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5 pt-3 mt-2 border-t border-slate-100/80">
-                  <div
-                    className="w-4 h-4 rounded-full border border-slate-300"
-                    style={{ backgroundColor: st.primary_color }}
-                    title="Couleur principale"
-                  />
-                  <div
-                    className="w-4 h-4 rounded-full border border-slate-300"
-                    style={{ backgroundColor: st.accent_color }}
-                    title="Couleur d'accent"
-                  />
-                  <div
-                    className="w-4 h-4 rounded-full border border-slate-300"
-                    style={{ backgroundColor: st.header_color }}
-                    title="Couleur d'en-tête"
-                  />
-                  <span className="text-[10px] text-slate-400 font-mono ml-auto">
-                    {isSelected ? "En cours de modification" : "Cliquer pour configurer"}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
         </div>
       </div>
 
@@ -387,19 +319,79 @@ export const InvoiceStyleManager: React.FC = () => {
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  Fond de l'en-tête
+                  Fond de l'en-tête (Bandeau)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.header_color || "#f8fafc"}
-                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_color: e.target.value }))}
+                    value={draftStyle.header_bg_color || "#facc15"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_bg_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.header_color || "#f8fafc"}
-                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_color: e.target.value }))}
+                    value={draftStyle.header_bg_color || "#facc15"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_bg_color: e.target.value }))}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Texte de l'en-tête
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={draftStyle.header_text_color || "#111827"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_text_color: e.target.value }))}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
+                  />
+                  <input
+                    type="text"
+                    value={draftStyle.header_text_color || "#111827"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, header_text_color: e.target.value }))}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Fond en-tête de tableau
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={draftStyle.table_header_bg_color || "#1e293b"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_bg_color: e.target.value }))}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
+                  />
+                  <input
+                    type="text"
+                    value={draftStyle.table_header_bg_color || "#1e293b"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_bg_color: e.target.value }))}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Texte en-tête de tableau
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={draftStyle.table_header_text_color || "#ffffff"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_text_color: e.target.value }))}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
+                  />
+                  <input
+                    type="text"
+                    value={draftStyle.table_header_text_color || "#ffffff"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, table_header_text_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
                 </div>
@@ -412,18 +404,52 @@ export const InvoiceStyleManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={draftStyle.footer_color || "#f1f5f9"}
-                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_color: e.target.value }))}
+                    value={draftStyle.footer_bg_color || "#ffffff"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_bg_color: e.target.value }))}
                     className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
                   />
                   <input
                     type="text"
-                    value={draftStyle.footer_color || "#f1f5f9"}
-                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_color: e.target.value }))}
+                    value={draftStyle.footer_bg_color || "#ffffff"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_bg_color: e.target.value }))}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Couleur texte du pied de page
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={draftStyle.footer_text_color || "#334155"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_text_color: e.target.value }))}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
+                  />
+                  <input
+                    type="text"
+                    value={draftStyle.footer_text_color || "#334155"}
+                    onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_text_color: e.target.value }))}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Text / Terms & Conditions */}
+            <div className="pt-2">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                Conditions / Texte de bas de page (Terms & Conditions)
+              </label>
+              <textarea
+                value={draftStyle.footer_text || ""}
+                onChange={(e) => setDraftStyle((prev) => ({ ...prev, footer_text: e.target.value }))}
+                rows={3}
+                placeholder="Entrez les conditions générales ou le texte par défaut du pied de page..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
             </div>
           </div>
 
@@ -468,11 +494,11 @@ export const InvoiceStyleManager: React.FC = () => {
               <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100/80 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={Boolean(draftStyle.show_cnss)}
-                  onChange={(e) => setDraftStyle((prev) => ({ ...prev, show_cnss: e.target.checked }))}
+                  checked={draftStyle.show_due_date !== false}
+                  onChange={(e) => setDraftStyle((prev) => ({ ...prev, show_due_date: e.target.checked }))}
                   className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
                 />
-                <span className="font-semibold text-slate-800">Afficher la CNSS</span>
+                <span className="font-semibold text-slate-800">Date d'échéance</span>
               </label>
 
               <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100/80 cursor-pointer">
