@@ -186,11 +186,11 @@ export const InvoiceStyleManager: React.FC = () => {
 
         {/* Style Selection Cards / Tabs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-6 border-t border-slate-100 mt-5">
-          {styles.map((st) => {
+          {styles.map((st, idx) => {
             const isSelected = selectedStyle.id === st.id;
             return (
               <button
-                key={st.id}
+                key={st.id ?? st.style_key ?? idx}
                 type="button"
                 onClick={() => {
                   clearMessages();
@@ -303,8 +303,8 @@ export const InvoiceStyleManager: React.FC = () => {
                 <option value="default">
                   {defaultLogo ? `Logo par défaut (${defaultLogo.name})` : "Logo par défaut de l'entreprise"}
                 </option>
-                {logos.map((logo) => (
-                  <option key={logo.id} value={logo.id}>
+                {logos.map((logo, idx) => (
+                  <option key={logo.id ?? logo.name ?? idx} value={logo.id}>
                     {logo.name} {logo.is_default ? "(Actuellement par défaut)" : ""}
                   </option>
                 ))}
@@ -328,9 +328,9 @@ export const InvoiceStyleManager: React.FC = () => {
                 Palettes recommandées
               </label>
               <div className="flex flex-wrap gap-2">
-                {COLOR_PRESETS.map((preset) => (
+                {COLOR_PRESETS.map((preset, idx) => (
                   <button
-                    key={preset.name}
+                    key={preset.name ?? idx}
                     type="button"
                     onClick={() => handleApplyPreset(preset)}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 cursor-pointer transition-colors"

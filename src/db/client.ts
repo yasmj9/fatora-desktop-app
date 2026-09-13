@@ -162,83 +162,94 @@ class WebLocalSqliteClient implements DbClient {
       }
 
       const storedStyles = localStorage.getItem("fatora_invoice_styles");
+      const defaultStylesList = [
+        {
+          id: 1,
+          style_key: 'style_1',
+          name: 'Style 1 — Classique',
+          description: 'Présentation traditionnelle et structurée avec en-tête encadré et grille de facturation nette.',
+          logo_id: null,
+          primary_color: '#1e3a8a',
+          header_color: '#f8fafc',
+          accent_color: '#2563eb',
+          footer_color: '#f1f5f9',
+          footer_text: 'Merci de votre confiance. Facture payable selon les conditions convenues.',
+          show_ice: 1,
+          show_tax_id: 1,
+          show_rc: 1,
+          show_cnss: 0,
+          show_iban: 1,
+          show_phone: 1,
+          show_email: 1,
+          show_address: 1,
+          is_default: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          style_key: 'style_2',
+          name: 'Style 2 — Moderne',
+          description: 'Style contemporain et épuré mettant en valeur la typographie avec bande latérale d\'accentuation.',
+          logo_id: null,
+          primary_color: '#0f172a',
+          header_color: '#ffffff',
+          accent_color: '#0d9488',
+          footer_color: '#f8fafc',
+          footer_text: 'Document officiel établi conformément aux réglementations commerciales en vigueur.',
+          show_ice: 1,
+          show_tax_id: 1,
+          show_rc: 1,
+          show_cnss: 0,
+          show_iban: 1,
+          show_phone: 1,
+          show_email: 1,
+          show_address: 1,
+          is_default: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 3,
+          style_key: 'style_3',
+          name: 'Style 3 — Épuré',
+          description: 'Design minimaliste axé sur le contraste visuel fort et la clarté maximale des montants.',
+          logo_id: null,
+          primary_color: '#334155',
+          header_color: '#ffffff',
+          accent_color: '#ea580c',
+          footer_color: '#ffffff',
+          footer_text: 'Paiement par virement bancaire recommandé avec mention du numéro de facture.',
+          show_ice: 1,
+          show_tax_id: 1,
+          show_rc: 1,
+          show_cnss: 0,
+          show_iban: 1,
+          show_phone: 1,
+          show_email: 1,
+          show_address: 1,
+          is_default: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ];
+
       if (storedStyles) {
-        this.invoiceStyles = JSON.parse(storedStyles);
+        try {
+          const parsed = JSON.parse(storedStyles);
+          this.invoiceStyles = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          this.invoiceStyles = [];
+        }
       }
-      if (this.invoiceStyles.length === 0) {
-        this.invoiceStyles = [
-          {
-            id: 1,
-            style_key: 'style_1',
-            name: 'Style 1 — Classique',
-            description: 'Présentation traditionnelle et structurée avec en-tête encadré et grille de facturation nette.',
-            logo_id: null,
-            primary_color: '#1e3a8a',
-            header_color: '#f8fafc',
-            accent_color: '#2563eb',
-            footer_color: '#f1f5f9',
-            footer_text: 'Merci de votre confiance. Facture payable selon les conditions convenues.',
-            show_ice: 1,
-            show_tax_id: 1,
-            show_rc: 1,
-            show_cnss: 0,
-            show_iban: 1,
-            show_phone: 1,
-            show_email: 1,
-            show_address: 1,
-            is_default: 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 2,
-            style_key: 'style_2',
-            name: 'Style 2 — Moderne',
-            description: 'Style contemporain et épuré mettant en valeur la typographie avec bande latérale d\'accentuation.',
-            logo_id: null,
-            primary_color: '#0f172a',
-            header_color: '#ffffff',
-            accent_color: '#0d9488',
-            footer_color: '#f8fafc',
-            footer_text: 'Document officiel établi conformément aux réglementations commerciales en vigueur.',
-            show_ice: 1,
-            show_tax_id: 1,
-            show_rc: 1,
-            show_cnss: 0,
-            show_iban: 1,
-            show_phone: 1,
-            show_email: 1,
-            show_address: 1,
-            is_default: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 3,
-            style_key: 'style_3',
-            name: 'Style 3 — Épuré',
-            description: 'Design minimaliste axé sur le contraste visuel fort et la clarté maximale des montants.',
-            logo_id: null,
-            primary_color: '#334155',
-            header_color: '#ffffff',
-            accent_color: '#ea580c',
-            footer_color: '#ffffff',
-            footer_text: 'Paiement par virement bancaire recommandé avec mention du numéro de facture.',
-            show_ice: 1,
-            show_tax_id: 1,
-            show_rc: 1,
-            show_cnss: 0,
-            show_iban: 1,
-            show_phone: 1,
-            show_email: 1,
-            show_address: 1,
-            is_default: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ];
-        this.saveInvoiceStylesToStorage();
+
+      // Ensure all default styles exist
+      for (const defSt of defaultStylesList) {
+        if (!this.invoiceStyles.some((s) => Number(s.id) === defSt.id || s.style_key === defSt.style_key)) {
+          this.invoiceStyles.push(defSt);
+        }
       }
+      this.saveInvoiceStylesToStorage();
     } catch {
       // Ignore localStorage read errors in restricted contexts
     }

@@ -79,8 +79,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
         >
           {isOpen ? (
             <div className="flex items-center gap-3 overflow-hidden w-full">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs shrink-0">
-                F
+              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-xs shrink-0">
+                <img src="/logo.svg" alt="Fatora" className="w-full h-full object-contain" />
               </div>
               <div className="truncate flex-1">
                 <h1 className="font-bold text-lg text-slate-900 leading-tight truncate">
@@ -93,14 +93,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
             </div>
           ) : (
             <div
-              className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs cursor-pointer hover:bg-blue-700 transition-colors"
+              className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-xs cursor-pointer hover:bg-slate-50 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggle();
               }}
               title="Ouvrir le menu"
             >
-              F
+              <img src="/logo.svg" alt="Fatora" className="w-full h-full object-contain" />
             </div>
           )}
         </div>

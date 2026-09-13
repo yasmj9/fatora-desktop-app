@@ -1,22 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Building2,
   Phone,
   MapPin,
-  Mail,
-  Globe,
-  FileCheck,
-  CreditCard,
-  Sliders,
   CheckCircle,
   AlertCircle,
   Save,
   Loader2,
-  ChevronDown,
-  ChevronUp,
-  User,
+  Sliders,
+  FileText,
   ShieldAlert,
   Image as ImageIcon,
   ArrowRight,
@@ -33,11 +27,6 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
   const { settings, isLoading, isSaving, error, successMessage, saveSettings, clearMessages } =
     useCompanySettings();
   const { defaultLogo } = useLogos();
-
-  // Accordion state for advanced / optional sections to keep the UI clean and uncluttered
-  const [showLegalSection, setShowLegalSection] = useState(false);
-  const [showBankSection, setShowBankSection] = useState(false);
-  const [showContactSection, setShowContactSection] = useState(false);
 
   const {
     register,
@@ -89,17 +78,6 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
         currency: settings.currency || "MAD",
         document_language: (settings.document_language as "fr" | "ar" | "en") || "fr",
       });
-
-      // Automatically open sections if existing data exists in them
-      if (settings.ice || settings.if_tax || settings.rc || settings.patente || settings.cnss) {
-        setShowLegalSection(true);
-      }
-      if (settings.bank_name || settings.rib_iban) {
-        setShowBankSection(true);
-      }
-      if (settings.contact_person || settings.email || settings.website) {
-        setShowContactSection(true);
-      }
     }
   }, [settings, reset]);
 
@@ -122,7 +100,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
   const isConfigured = Boolean(settings.name && settings.phone);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl mx-auto">
       {/* Feedback Messages */}
       {successMessage && (
         <div
@@ -137,7 +115,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
           <button
             type="button"
             onClick={clearMessages}
-            className="text-emerald-700 hover:text-emerald-900 text-xs font-semibold px-2 py-1"
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-semibold px-2 py-1 cursor-pointer"
           >
             Fermer
           </button>
@@ -157,32 +135,32 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
           <button
             type="button"
             onClick={clearMessages}
-            className="text-rose-700 hover:text-rose-900 text-xs font-semibold px-2 py-1"
+            className="text-rose-700 hover:text-rose-900 text-xs font-semibold px-2 py-1 cursor-pointer"
           >
             Fermer
           </button>
         </div>
       )}
 
-      {/* SECTION 1: ESSENTIAL & PRIORITIZED INFORMATION */}
-      <div className="bg-white rounded-2xl border-2 border-blue-200/70 p-6 sm:p-7 shadow-xs relative overflow-hidden">
+      {/* CARD 1: COMPANY INFORMATION + ICE & RC */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
               <Building2 size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 leading-tight">
-                Informations principales de votre entreprise
+              <h3 className="text-base font-bold text-slate-900 leading-tight">
+                Informations de l'entreprise
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                Ces coordonnées indispensables figureront sur l'en-tête de tous vos devis et factures.
+                Ces coordonnées et numéros légaux (ICE, RC) apparaîtront sur vos devis et factures.
               </p>
             </div>
           </div>
           {isConfigured ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold w-fit">
-              <CheckCircle size={14} /> Profil configuré
+              <CheckCircle size={14} /> Configuré
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold w-fit">
@@ -196,9 +174,9 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
           <div className="md:col-span-2">
             <label
               htmlFor="company-name-input"
-              className="block text-sm font-bold text-slate-800 mb-1.5"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
             >
-              Nom de votre entreprise ou atelier <span className="text-rose-600">*</span>
+              Nom de l'entreprise <span className="text-rose-600">*</span>
             </label>
             <div className="relative">
               <Building2
@@ -209,8 +187,8 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
                 id="company-name-input"
                 type="text"
                 {...register("name")}
-                placeholder="Ex: Électricité Bennis, Menuiserie de l'Atlas, Plomberie Moderne..."
-                className={`w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                placeholder="Ex: Mon Entreprise SARL"
+                className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                   errors.name
                     ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-500"
                     : "border-slate-300 focus:ring-blue-500/20 focus:border-blue-600"
@@ -218,17 +196,17 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
               />
             </div>
             {errors.name && (
-              <p className="text-xs text-rose-600 font-medium mt-1.5 flex items-center gap-1">
+              <p className="text-xs text-rose-600 font-medium mt-1 flex items-center gap-1">
                 <AlertCircle size={14} /> {errors.name.message}
               </p>
             )}
           </div>
 
           {/* Téléphone */}
-          <div className="md:col-span-1">
+          <div>
             <label
               htmlFor="company-phone-input"
-              className="block text-sm font-bold text-slate-800 mb-1.5"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
             >
               Téléphone <span className="text-rose-600">*</span>
             </label>
@@ -241,8 +219,8 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
                 id="company-phone-input"
                 type="text"
                 {...register("phone")}
-                placeholder="Ex: 06 61 23 45 67 ou 05 22 10 20 30"
-                className={`w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                placeholder="Ex: 06 61 23 45 67"
+                className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                   errors.phone
                     ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-500"
                     : "border-slate-300 focus:ring-blue-500/20 focus:border-blue-600"
@@ -250,17 +228,17 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
               />
             </div>
             {errors.phone && (
-              <p className="text-xs text-rose-600 font-medium mt-1.5 flex items-center gap-1">
+              <p className="text-xs text-rose-600 font-medium mt-1 flex items-center gap-1">
                 <AlertCircle size={14} /> {errors.phone.message}
               </p>
             )}
           </div>
 
           {/* Ville */}
-          <div className="md:col-span-1">
+          <div>
             <label
               htmlFor="company-city-input"
-              className="block text-sm font-bold text-slate-800 mb-1.5"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
             >
               Ville
             </label>
@@ -273,351 +251,84 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
                 id="company-city-input"
                 type="text"
                 {...register("city")}
-                placeholder="Ex: Casablanca, Rabat, Marrakech, Fès, Tanger..."
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+                placeholder="Ex: Casablanca"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
               />
             </div>
           </div>
 
-          {/* Adresse complète */}
+          {/* Adresse */}
           <div className="md:col-span-2">
             <label
               htmlFor="company-address-input"
-              className="block text-sm font-bold text-slate-800 mb-1.5"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
             >
-              Adresse de l'atelier ou bureau
+              Adresse
             </label>
             <div className="relative">
               <MapPin
                 size={18}
-                className="absolute left-3.5 top-3.5 text-slate-400"
+                className="absolute left-3.5 top-3 text-slate-400"
               />
               <textarea
                 id="company-address-input"
                 rows={2}
                 {...register("address")}
-                placeholder="Ex: 24 Rue des Entrepreneurs, Quartier Industriel Sidi Bernoussi"
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all resize-none"
+                placeholder="Ex: 12 Boulevard Mohammed V"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all resize-none"
+              />
+            </div>
+          </div>
+
+          {/* ICE */}
+          <div>
+            <label
+              htmlFor="company-ice-input"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
+            >
+              ICE (Identifiant Commun de l'Entreprise)
+            </label>
+            <div className="relative">
+              <FileText
+                size={18}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                id="company-ice-input"
+                type="text"
+                {...register("ice")}
+                placeholder="Ex: 001234567000089"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+              />
+            </div>
+          </div>
+
+          {/* RC */}
+          <div>
+            <label
+              htmlFor="company-rc-input"
+              className="block text-xs font-bold text-slate-700 mb-1.5"
+            >
+              RC (Registre du Commerce)
+            </label>
+            <div className="relative">
+              <FileText
+                size={18}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                id="company-rc-input"
+                type="text"
+                {...register("rc")}
+                placeholder="Ex: 123456 Casablanca"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* SECTION 2: CONTACT & WEB (COLLAPSIBLE / CLEAR SEPARATION) */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-        <button
-          type="button"
-          id="btn-toggle-contact-section"
-          onClick={() => setShowContactSection(!showContactSection)}
-          className="w-full px-6 py-4 flex items-center justify-between bg-slate-50/70 hover:bg-slate-100/80 transition-colors text-left cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
-              <User size={18} />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">
-                Contact & Présence en ligne (Facultatif)
-              </h4>
-              <p className="text-xs text-slate-500">
-                Responsable, adresse e-mail et site web.
-              </p>
-            </div>
-          </div>
-          <div className="text-slate-400">
-            {showContactSection ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </div>
-        </button>
-
-        {showContactSection && (
-          <div className="p-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white">
-            {/* Responsable */}
-            <div>
-              <label
-                htmlFor="company-contact-person-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Nom du responsable
-              </label>
-              <div className="relative">
-                <User
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  id="company-contact-person-input"
-                  type="text"
-                  {...register("contact_person")}
-                  placeholder="Ex: Hassan Bennis"
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="company-email-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Adresse e-mail
-              </label>
-              <div className="relative">
-                <Mail
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  id="company-email-input"
-                  type="email"
-                  {...register("email")}
-                  placeholder="Ex: contact@electricite-bennis.ma"
-                  className={`w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 ${
-                    errors.email
-                      ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-500"
-                      : "border-slate-200 focus:ring-blue-500/20 focus:border-blue-600"
-                  }`}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs text-rose-600 font-medium mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Site Web */}
-            <div>
-              <label
-                htmlFor="company-website-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Site internet ou page professionnelle
-              </label>
-              <div className="relative">
-                <Globe
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  id="company-website-input"
-                  type="text"
-                  {...register("website")}
-                  placeholder="Ex: www.electricite-bennis.ma"
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-            </div>
-
-            {/* Pays */}
-            <div>
-              <label
-                htmlFor="company-country-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Pays
-              </label>
-              <input
-                id="company-country-input"
-                type="text"
-                {...register("country")}
-                placeholder="Maroc"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* SECTION 3: LEGAL & TAX IDENTIFIERS (MAROC) */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-        <button
-          type="button"
-          id="btn-toggle-legal-section"
-          onClick={() => setShowLegalSection(!showLegalSection)}
-          className="w-full px-6 py-4 flex items-center justify-between bg-slate-50/70 hover:bg-slate-100/80 transition-colors text-left cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
-              <FileCheck size={18} />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">
-                Identifiants légaux & fiscaux (Facultatif)
-              </h4>
-              <p className="text-xs text-slate-500">
-                ICE, IF, RC, Patente et CNSS (mentions légales au bas des factures).
-              </p>
-            </div>
-          </div>
-          <div className="text-slate-400">
-            {showLegalSection ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </div>
-        </button>
-
-        {showLegalSection && (
-          <div className="p-6 border-t border-slate-200 space-y-4 bg-white">
-            <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              💡 Renseignez uniquement les numéros dont vous disposez. Si vous êtes auto-entrepreneur ou indépendant non assujetti, vous pouvez laisser ces cases vides.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* ICE */}
-              <div>
-                <label
-                  htmlFor="company-ice-input"
-                  className="block text-xs font-bold text-slate-700 mb-1.5"
-                >
-                  ICE (Identifiant Commun de l'Entreprise)
-                </label>
-                <input
-                  id="company-ice-input"
-                  type="text"
-                  {...register("ice")}
-                  placeholder="Ex: 001234567000089 (15 chiffres)"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-
-              {/* IF */}
-              <div>
-                <label
-                  htmlFor="company-if-input"
-                  className="block text-xs font-bold text-slate-700 mb-1.5"
-                >
-                  IF (Identifiant Fiscal)
-                </label>
-                <input
-                  id="company-if-input"
-                  type="text"
-                  {...register("if_tax")}
-                  placeholder="Ex: 12345678"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-
-              {/* RC */}
-              <div>
-                <label
-                  htmlFor="company-rc-input"
-                  className="block text-xs font-bold text-slate-700 mb-1.5"
-                >
-                  RC (Registre du Commerce)
-                </label>
-                <input
-                  id="company-rc-input"
-                  type="text"
-                  {...register("rc")}
-                  placeholder="Ex: 123456 Casablanca"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-
-              {/* Patente */}
-              <div>
-                <label
-                  htmlFor="company-patente-input"
-                  className="block text-xs font-bold text-slate-700 mb-1.5"
-                >
-                  Patente / Taxe Professionnelle
-                </label>
-                <input
-                  id="company-patente-input"
-                  type="text"
-                  {...register("patente")}
-                  placeholder="Ex: 34567890"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-
-              {/* CNSS */}
-              <div className="md:col-span-2">
-                <label
-                  htmlFor="company-cnss-input"
-                  className="block text-xs font-bold text-slate-700 mb-1.5"
-                >
-                  N° CNSS
-                </label>
-                <input
-                  id="company-cnss-input"
-                  type="text"
-                  {...register("cnss")}
-                  placeholder="Ex: 7890123"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* SECTION 4: BANK DETAILS */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-        <button
-          type="button"
-          id="btn-toggle-bank-section"
-          onClick={() => setShowBankSection(!showBankSection)}
-          className="w-full px-6 py-4 flex items-center justify-between bg-slate-50/70 hover:bg-slate-100/80 transition-colors text-left cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
-              <CreditCard size={18} />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">
-                Coordonnées bancaires pour vos virements (Facultatif)
-              </h4>
-              <p className="text-xs text-slate-500">
-                Affichez votre RIB sur les factures pour faciliter les paiements par virement.
-              </p>
-            </div>
-          </div>
-          <div className="text-slate-400">
-            {showBankSection ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </div>
-        </button>
-
-        {showBankSection && (
-          <div className="p-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white">
-            {/* Nom de la banque */}
-            <div className="md:col-span-1">
-              <label
-                htmlFor="company-bank-name-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Nom de votre banque
-              </label>
-              <input
-                id="company-bank-name-input"
-                type="text"
-                {...register("bank_name")}
-                placeholder="Ex: Attijariwafa bank, Banque Populaire, CIH..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-              />
-            </div>
-
-            {/* RIB / IBAN */}
-            <div className="md:col-span-1">
-              <label
-                htmlFor="company-rib-input"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                RIB (Relevé d'Identité Bancaire / 24 chiffres)
-              </label>
-              <input
-                id="company-rib-input"
-                type="text"
-                {...register("rib_iban")}
-                placeholder="Ex: 007 780 0001234567890123 45"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* SECTION 5: DOCUMENT PREFERENCES (CURRENCY & LANGUAGE) */}
+      {/* CARD 2: DOCUMENT PREFERENCES (CURRENCY, LANGUAGE & LOGO) */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <div className="flex items-center gap-3 pb-3 mb-4 border-b border-slate-100">
           <div className="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
@@ -653,7 +364,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
             </select>
           </div>
 
-          {/* Langue des documents */}
+          {/* Langue */}
           <div>
             <label
               htmlFor="company-language-select"
@@ -673,7 +384,7 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
           </div>
         </div>
 
-        {/* LOGO SELECTION SUMMARY CARD */}
+        {/* LOGO PREVIEW SHORTCUT */}
         <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div className="flex items-center gap-3">
             {defaultLogo ? (

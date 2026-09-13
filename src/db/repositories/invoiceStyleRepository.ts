@@ -101,10 +101,35 @@ export const invoiceStyleRepository = {
    */
   async updateStyle(id: number, input: InvoiceStyleUpdateInput): Promise<InvoiceStyle> {
     const db = await getDatabaseAsync();
-    const existing = await this.getStyleById(id);
+    let existing = await this.getStyleById(id);
 
     if (!existing) {
-      throw new Error("Le style spécifié est introuvable.");
+      try {
+        existing = await this.createStyle({
+          style_key: `style_${id}`,
+          name: input.name || `Style ${id}`,
+          description: input.description,
+          logo_id: input.logo_id,
+          primary_color: input.primary_color,
+          header_color: input.header_color,
+          accent_color: input.accent_color,
+          footer_color: input.footer_color,
+          footer_text: input.footer_text,
+          show_ice: input.show_ice,
+          show_tax_id: input.show_tax_id,
+          show_rc: input.show_rc,
+          show_cnss: input.show_cnss,
+          show_iban: input.show_iban,
+          show_phone: input.show_phone,
+          show_email: input.show_email,
+          show_address: input.show_address,
+          is_default: input.is_default,
+        });
+        return existing;
+      } catch (createErr) {
+        console.error("[invoiceStyleRepository] Failed to auto-create missing style on update:", createErr);
+        throw new Error("Le style spécifié est introuvable.");
+      }
     }
 
     const updatedName = input.name !== undefined ? input.name.trim() : existing.name;
