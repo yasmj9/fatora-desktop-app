@@ -21,6 +21,7 @@ import { LogoManager } from "../components/settings/LogoManager";
 import { InvoiceStyleManager } from "../components/settings/InvoiceStyleManager";
 import { BackupRestoreManager } from "../components/settings/BackupRestoreManager";
 import { AccountSecuritySettings } from "../components/settings/AccountSecuritySettings";
+import { SystemLogsViewer } from "../components/settings/SystemLogsViewer";
 
 export const ParametresPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"company" | "numbering" | "logos" | "styles" | "backup" | "security" | "system">("company");
@@ -294,6 +295,9 @@ export const ParametresPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* System Action & Error Logs Viewer */}
+          <SystemLogsViewer />
         </div>
       )}
     </div>

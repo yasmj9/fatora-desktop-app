@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "fatora",
+  "productName": "Fatora",
   "version": "0.1.0",
   "identifier": "com.yassi.fatora",
   "build": {
@@ -12,9 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "fatora",
-        "width": 800,
-        "height": 600
+        "title": "Fatora - Gestion de Facturation",
+        "icon": "icons/icon.png",
+        "width": 1280,
+        "height": 800
       }
     ],
     "security": {

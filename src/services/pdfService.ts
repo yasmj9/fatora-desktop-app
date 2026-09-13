@@ -2,6 +2,7 @@ import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { DocumentData } from "../types/documentData";
 import { generateSafeFilename } from "../utils/documentTranslations";
+import { loggerService } from "./loggerService";
 
 export const pdfService = {
   /**
@@ -144,70 +145,121 @@ export const pdfService = {
   },
 
   /**
-   * Action: Enregistrer PDF (Saves file directly to computer with safe filename)
+   * Action: Enregistrer PDF (Prompts user with 'Save As' file picker dialog or browser save)
    */
   async downloadPdf(element: HTMLElement, documentData: DocumentData): Promise<string> {
-    const pdf = await this.generatePdfFromElement(element);
-    const filename = generateSafeFilename(
-      documentData.documentNumber,
-      documentData.client.name,
-      "pdf"
-    );
-    pdf.save(filename);
-    return filename;
+    try {
+      loggerService.logAction("PDF", `Génération du PDF pour ${documentData.documentNumber}`);
+      const pdf = await this.generatePdfFromElement(element);
+      const filename = generateSafeFilename(
+        documentData.documentNumber,
+        documentData.client.name,
+        "pdf"
+      );
+
+      // Check if showSaveFilePicker API is supported (Desktop / Chromium / WebView2 / Tauri)
+      if (typeof window !== "undefined" && "showSaveFilePicker" in window) {
+        try {
+          const handle = await (window as any).showSaveFilePicker({
+            suggestedName: filename,
+            types: [
+              {
+                description: "Document PDF (*.pdf)",
+                accept: { "application/pdf": [".pdf"] },
+              },
+            ],
+          });
+          const writable = await handle.createWritable();
+          const blob = pdf.output("blob");
+          await writable.write(blob);
+          await writable.close();
+
+          loggerService.logSuccess("PDF", `PDF enregistré avec succès : ${filename}`);
+          return filename;
+        } catch (err: any) {
+          if (err.name === "AbortError") {
+            loggerService.logInfo("PDF", "Enregistrement du PDF annulé par l'utilisateur.");
+            return filename;
+          }
+          loggerService.logWarn("PDF", "Diaporama de sauvegarde non pris en charge, utilisation du mode de secours.", String(err));
+        }
+      }
+
+      // Fallback if showSaveFilePicker is cancelled or not supported
+      pdf.save(filename);
+      loggerService.logSuccess("PDF", `PDF téléchargé dans le dossier de téléchargements : ${filename}`);
+      return filename;
+    } catch (err: any) {
+      loggerService.logError("PDF", `Échec de génération PDF pour ${documentData.documentNumber}`, err?.stack || String(err));
+      throw err;
+    }
   },
 
   /**
    * Action: Générer/Ouvrir PDF (Opens generated PDF blob in a new browser tab/window)
    */
   async openPdfInNewTab(element: HTMLElement): Promise<void> {
-    const pdf = await this.generatePdfFromElement(element);
-    const blob = pdf.output("blob");
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, "_blank");
+    try {
+      loggerService.logAction("PDF", "Ouverture de l'aperçu PDF dans une nouvelle fenêtre");
+      const pdf = await this.generatePdfFromElement(element);
+      const blob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank");
+      loggerService.logSuccess("PDF", "Aperçu PDF ouvert avec succès.");
+    } catch (err: any) {
+      loggerService.logError("PDF", "Échec lors de l'ouverture de l'aperçu PDF", err?.stack || String(err));
+      throw err;
+    }
   },
 
   /**
    * Action: Imprimer (Triggers clean print for the document)
    */
   async printDocument(element: HTMLElement): Promise<void> {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      window.print();
-      return;
+    try {
+      loggerService.logAction("PDF", "Lancement de la fenêtre d'impression du document");
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        window.print();
+        return;
+      }
+
+      const isRtl = element.getAttribute("dir") === "rtl";
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="${isRtl ? "ar" : "fr"}" dir="${isRtl ? "rtl" : "ltr"}">
+          <head>
+            <title>Impression Facture</title>
+            <meta charset="utf-8" />
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @media print {
+                body { margin: 0; padding: 0; background: white; }
+                @page { size: A4; margin: 8mm; }
+              }
+            </style>
+          </head>
+          <body class="bg-white p-4 font-sans">
+            <div style="max-width: 800px; margin: 0 auto;">
+              ${element.outerHTML}
+            </div>
+            <script>
+              setTimeout(() => {
+                window.print();
+                setTimeout(() => window.close(), 500);
+              }, 600);
+            </script>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      loggerService.logSuccess("PDF", "Impression envoyée avec succès à l'imprimante.");
+    } catch (err: any) {
+      loggerService.logError("PDF", "Erreur lors de l'impression du document", err?.stack || String(err));
+      throw err;
     }
-
-    const isRtl = element.getAttribute("dir") === "rtl";
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="${isRtl ? "ar" : "fr"}" dir="${isRtl ? "rtl" : "ltr"}">
-        <head>
-          <title>Impression Facture</title>
-          <meta charset="utf-8" />
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            @media print {
-              body { margin: 0; padding: 0; background: white; }
-              @page { size: A4; margin: 8mm; }
-            }
-          </style>
-        </head>
-        <body class="bg-white p-4 font-sans">
-          <div style="max-width: 800px; margin: 0 auto;">
-            ${element.outerHTML}
-          </div>
-          <script>
-            setTimeout(() => {
-              window.print();
-              setTimeout(() => window.close(), 500);
-            }, 600);
-          </script>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
   },
 };
