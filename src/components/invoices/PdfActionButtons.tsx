@@ -144,7 +144,7 @@ export const PdfActionButtons: React.FC<PdfActionButtonsProps> = ({
           aria-hidden="true"
           className="fixed -left-[9999px] -top-[9999px] opacity-0 pointer-events-none"
         >
-          <div ref={hiddenDocRef} className="w-[794px] bg-white p-2">
+          <div ref={hiddenDocRef} className="w-[794px] min-h-[1120px] bg-white">
             <StyleRenderer documentData={documentData} />
           </div>
         </div>

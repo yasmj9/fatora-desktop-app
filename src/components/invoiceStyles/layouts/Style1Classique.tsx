@@ -40,7 +40,7 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
   return (
     <div
       dir={isRtl ? "rtl" : "ltr"}
-      className="text-slate-800 text-xs font-sans rounded-xl border border-slate-200 flex flex-col justify-between min-h-[840px] overflow-hidden"
+      className="text-slate-800 text-xs font-sans flex flex-col justify-between min-h-[1120px] w-full bg-white box-border"
       style={{
         backgroundColor: "#ffffff",
         fontFamily: isRtl
@@ -50,9 +50,9 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
     >
       <div className="flex flex-col flex-1">
         {/* TOP FULL-WIDTH HEADER with margin on top and dark yellow background */}
-        <div className="pt-3 px-3">
+        <div className="pt-4 px-4 sm:pt-6 sm:px-6">
           <div
-            className="w-full px-6 py-5 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4"
+            className="w-full px-6 py-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-2xs"
             style={{
               backgroundColor: headerBg,
               color: headerText,
@@ -267,6 +267,8 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
                     style={{
                       backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
                       borderTop: "1px solid #e2e8f0",
+                      breakInside: "avoid",
+                      pageBreakInside: "avoid",
                     }}
                   >
                     <td
@@ -300,7 +302,7 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
           </div>
 
           {/* SECTION 4: SUMMARY OF TOTAL WITH TAX */}
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-2" style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
             <div
               className="w-full sm:w-80 space-y-1.5 text-[11px] p-4 rounded-xl border"
               style={{
@@ -430,9 +432,9 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
       </div>
 
       {/* SECTION 6: FULL-WIDTH FOOTER with background color matching header */}
-      <div className="p-3 pt-0 mt-auto">
+      <div className="p-4 pt-0 sm:p-6 sm:pt-0 mt-auto">
         <div
-          className="w-full px-6 py-3 rounded-lg text-center text-[10px] font-bold leading-relaxed shadow-xs"
+          className="w-full px-6 py-3.5 rounded-xl text-center text-[10px] font-bold leading-relaxed shadow-2xs"
           style={{
             backgroundColor: footerBg,
             color: footerTextClr,

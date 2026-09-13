@@ -169,7 +169,10 @@ export const Style3Epure: React.FC<StyleLayoutProps> = ({ documentData }) => {
         </thead>
         <tbody className="divide-y divide-slate-100 text-[11px]">
           {items.map((item, idx) => (
-            <tr key={item.id || idx}>
+            <tr
+              key={item.id || idx}
+              style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+            >
               <td className={`py-3 font-semibold text-slate-900 ${isRtl ? "text-right" : "text-left"}`}>
                 {item.description}
               </td>

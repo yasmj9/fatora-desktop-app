@@ -3,6 +3,8 @@ import { Quotation } from "../../types/quotation";
 import { QuotationStatusBadge } from "./QuotationStatusBadge";
 import { ConvertQuotationModal } from "./ConvertQuotationModal";
 import { quotationRepository } from "../../db/repositories/quotationRepository";
+import { invoiceStyleRepository } from "../../db/repositories/invoiceStyleRepository";
+import { logoRepository } from "../../db/repositories/logoRepository";
 import { pdfService } from "../../services/pdfService";
 import { buildDocumentData } from "../../utils/documentDataBuilder";
 import { formatMoney } from "../../utils/money";
@@ -187,27 +189,43 @@ export const QuotationDetailView: React.FC<QuotationDetailViewProps> = ({
         })),
       };
 
-      const defaultStyle: any = {
+      const [activeStyle, activeLogo] = await Promise.all([
+        invoiceStyleRepository.getDefaultStyle(),
+        logoRepository.getDefaultLogo(),
+      ]);
+
+      const effectiveStyle: any = activeStyle || {
         id: 1,
         style_key: "style_1",
-        name: "A4 Professionnel",
+        name: "Style 1",
+        logo_id: null,
+        description: null,
         primary_color: "#1e293b",
-        header_color: "#0f172a",
-        accent_color: "#2563eb",
-        footer_color: "#64748b",
+        header_color: "#ca8a04",
+        accent_color: "#ca8a04",
+        footer_color: "#ca8a04",
+        header_bg_color: "#ca8a04",
+        header_text_color: "#111827",
+        table_header_bg_color: "#1e293b",
+        table_header_text_color: "#ffffff",
+        footer_bg_color: "#ca8a04",
+        footer_text_color: "#111827",
         footer_text: "Merci de votre confiance.",
         show_ice: true,
         show_tax_id: true,
         show_rc: true,
-        show_cnss: true,
+        show_cnss: false,
         show_iban: true,
         show_phone: true,
         show_email: true,
         show_address: true,
+        show_due_date: true,
         is_default: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      const documentData = buildDocumentData(invoiceAdapter, defaultStyle);
+      const documentData = buildDocumentData(invoiceAdapter, effectiveStyle, activeLogo?.file_data || null);
       await pdfService.downloadPdf(el, documentData);
     } catch (err) {
       console.error("Error downloading PDF:", err);

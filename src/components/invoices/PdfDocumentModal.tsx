@@ -228,7 +228,7 @@ export const PdfDocumentModal: React.FC<PdfDocumentModalProps> = ({
             <div
               ref={documentRef}
               data-title={`Facture-${documentData.documentNumber}`}
-              className="w-full max-w-[794px] bg-white shadow-xl rounded-lg overflow-hidden transition-all"
+              className="w-full max-w-[794px] min-h-[1120px] bg-white shadow-2xl transition-all"
             >
               <StyleRenderer documentData={documentData} />
             </div>

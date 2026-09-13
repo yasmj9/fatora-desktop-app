@@ -86,8 +86,6 @@ export const pdfService = {
       },
     });
 
-    const imgData = canvas.toDataURL("image/png");
-
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -97,24 +95,49 @@ export const pdfService = {
     const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
     const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    // Calculate exact pixel height per A4 page based on canvas width and 210x297 aspect ratio
+    const pageHeightPx = (canvas.width * pdfHeight) / pdfWidth;
+    const totalPages = Math.max(1, Math.ceil(canvas.height / pageHeightPx));
 
-    if (imgHeight <= pdfHeight) {
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-    } else {
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
+    for (let p = 0; p < totalPages; p++) {
+      if (p > 0) {
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
       }
+
+      const sourceY = p * pageHeightPx;
+      const sliceHeightPx = Math.min(pageHeightPx, canvas.height - sourceY);
+
+      // Create a dedicated high-resolution canvas for this specific A4 page
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = pageHeightPx;
+      const pctx = pageCanvas.getContext("2d");
+
+      if (pctx) {
+        pctx.fillStyle = "#ffffff";
+        pctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        pctx.drawImage(
+          canvas,
+          0,
+          sourceY,
+          canvas.width,
+          sliceHeightPx,
+          0,
+          0,
+          canvas.width,
+          sliceHeightPx
+        );
+      }
+
+      const pageImgData = pageCanvas.toDataURL("image/png");
+      pdf.addImage(pageImgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      // Add page numbering (e.g. "1/2", "2/2", "1/1") in the bottom-right corner of each page
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(100, 116, 139);
+      const pageText = `${p + 1}/${totalPages}`;
+      pdf.text(pageText, pdfWidth - 10, pdfHeight - 2.5, { align: "right" });
     }
 
     return pdf;

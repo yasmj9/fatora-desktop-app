@@ -166,13 +166,19 @@ class WebLocalSqliteClient implements DbClient {
         {
           id: 1,
           style_key: 'style_1',
-          name: 'Style 1 — Classique',
-          description: 'Présentation traditionnelle et structurée avec en-tête encadré et grille de facturation nette.',
+          name: 'Style 1 — Jaune & Or (Classique)',
+          description: 'Présentation professionnelle avec bandeau supérieur or foncé, en-tête net et haute lisibilité.',
           logo_id: null,
-          primary_color: '#1e3a8a',
-          header_color: '#f8fafc',
-          accent_color: '#2563eb',
-          footer_color: '#f1f5f9',
+          primary_color: '#1e293b',
+          header_color: '#ca8a04',
+          accent_color: '#ca8a04',
+          footer_color: '#ca8a04',
+          header_bg_color: '#ca8a04',
+          header_text_color: '#111827',
+          table_header_bg_color: '#1e293b',
+          table_header_text_color: '#ffffff',
+          footer_bg_color: '#ca8a04',
+          footer_text_color: '#111827',
           footer_text: 'Merci de votre confiance. Facture payable selon les conditions convenues.',
           show_ice: 1,
           show_tax_id: 1,
@@ -182,6 +188,7 @@ class WebLocalSqliteClient implements DbClient {
           show_phone: 1,
           show_email: 1,
           show_address: 1,
+          show_due_date: 1,
           is_default: 1,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -189,13 +196,19 @@ class WebLocalSqliteClient implements DbClient {
         {
           id: 2,
           style_key: 'style_2',
-          name: 'Style 2 — Moderne',
-          description: 'Style contemporain et épuré mettant en valeur la typographie avec bande latérale d\'accentuation.',
+          name: 'Style 2 — Ambre & Noir (Moderne)',
+          description: 'Style contemporain et épuré avec bandeau ambre chaleureux.',
           logo_id: null,
           primary_color: '#0f172a',
-          header_color: '#ffffff',
-          accent_color: '#0d9488',
-          footer_color: '#f8fafc',
+          header_color: '#d97706',
+          accent_color: '#d97706',
+          footer_color: '#d97706',
+          header_bg_color: '#d97706',
+          header_text_color: '#ffffff',
+          table_header_bg_color: '#0f172a',
+          table_header_text_color: '#ffffff',
+          footer_bg_color: '#d97706',
+          footer_text_color: '#ffffff',
           footer_text: 'Document officiel établi conformément aux réglementations commerciales en vigueur.',
           show_ice: 1,
           show_tax_id: 1,
@@ -205,6 +218,7 @@ class WebLocalSqliteClient implements DbClient {
           show_phone: 1,
           show_email: 1,
           show_address: 1,
+          show_due_date: 1,
           is_default: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -212,13 +226,19 @@ class WebLocalSqliteClient implements DbClient {
         {
           id: 3,
           style_key: 'style_3',
-          name: 'Style 3 — Épuré',
-          description: 'Design minimaliste axé sur le contraste visuel fort et la clarté maximale des montants.',
+          name: 'Style 3 — Bleu Nuit (Épuré)',
+          description: 'Design corporatif et sobre axé sur le bleu nuit.',
           logo_id: null,
-          primary_color: '#334155',
-          header_color: '#ffffff',
-          accent_color: '#ea580c',
-          footer_color: '#ffffff',
+          primary_color: '#1e3a8a',
+          header_color: '#1e3a8a',
+          accent_color: '#2563eb',
+          footer_color: '#1e3a8a',
+          header_bg_color: '#1e3a8a',
+          header_text_color: '#ffffff',
+          table_header_bg_color: '#1e293b',
+          table_header_text_color: '#ffffff',
+          footer_bg_color: '#1e3a8a',
+          footer_text_color: '#ffffff',
           footer_text: 'Paiement par virement bancaire recommandé avec mention du numéro de facture.',
           show_ice: 1,
           show_tax_id: 1,
@@ -228,6 +248,7 @@ class WebLocalSqliteClient implements DbClient {
           show_phone: 1,
           show_email: 1,
           show_address: 1,
+          show_due_date: 1,
           is_default: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -242,6 +263,18 @@ class WebLocalSqliteClient implements DbClient {
           this.invoiceStyles = [];
         }
       }
+
+      // Ensure all fields exist on stored styles (migration for missing color/font/due_date properties)
+      this.invoiceStyles = this.invoiceStyles.map((s) => ({
+        ...s,
+        header_bg_color: s.header_bg_color || s.header_color || "#ca8a04",
+        header_text_color: s.header_text_color || "#111827",
+        table_header_bg_color: s.table_header_bg_color || "#1e293b",
+        table_header_text_color: s.table_header_text_color || "#ffffff",
+        footer_bg_color: s.footer_bg_color || s.header_bg_color || s.header_color || "#ca8a04",
+        footer_text_color: s.footer_text_color || "#111827",
+        show_due_date: s.show_due_date !== undefined ? Number(s.show_due_date) : 1,
+      }));
 
       // Ensure all default styles exist
       for (const defSt of defaultStylesList) {
@@ -977,6 +1010,44 @@ class WebLocalSqliteClient implements DbClient {
       return { rowsAffected: 1 };
     }
 
+    // INSERT INTO invoice_styles
+    if (trimmed.toUpperCase().includes("INSERT INTO INVOICE_STYLES")) {
+      const newId = (this.invoiceStyles.length > 0 ? Math.max(...this.invoiceStyles.map((s) => Number(s.id) || 1)) : 0) + 1;
+      const newStyle: Record<string, unknown> = {
+        id: newId,
+        style_key: bindValues[0] ?? `style_${newId}`,
+        name: bindValues[1] ?? `Style ${newId}`,
+        description: bindValues[2] || null,
+        logo_id: bindValues[3] || null,
+        primary_color: bindValues[4] ?? "#1e293b",
+        header_color: bindValues[5] ?? "#ca8a04",
+        accent_color: bindValues[6] ?? "#ca8a04",
+        footer_color: bindValues[7] ?? "#ca8a04",
+        header_bg_color: bindValues[8] ?? "#ca8a04",
+        header_text_color: bindValues[9] ?? "#111827",
+        table_header_bg_color: bindValues[10] ?? "#1e293b",
+        table_header_text_color: bindValues[11] ?? "#ffffff",
+        footer_bg_color: bindValues[12] ?? "#ca8a04",
+        footer_text_color: bindValues[13] ?? "#111827",
+        footer_text: bindValues[14] ?? "Merci de votre confiance.",
+        show_ice: bindValues[15] !== undefined ? Number(bindValues[15]) : 1,
+        show_tax_id: bindValues[16] !== undefined ? Number(bindValues[16]) : 1,
+        show_rc: bindValues[17] !== undefined ? Number(bindValues[17]) : 1,
+        show_cnss: bindValues[18] !== undefined ? Number(bindValues[18]) : 0,
+        show_iban: bindValues[19] !== undefined ? Number(bindValues[19]) : 1,
+        show_phone: bindValues[20] !== undefined ? Number(bindValues[20]) : 1,
+        show_email: bindValues[21] !== undefined ? Number(bindValues[21]) : 1,
+        show_address: bindValues[22] !== undefined ? Number(bindValues[22]) : 1,
+        show_due_date: bindValues[23] !== undefined ? Number(bindValues[23]) : 1,
+        is_default: bindValues[24] !== undefined ? Number(bindValues[24]) : 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.invoiceStyles.push(newStyle);
+      this.saveInvoiceStylesToStorage();
+      return { rowsAffected: 1, lastInsertId: newId };
+    }
+
     // UPDATE invoice_styles SET is_default = 0
     if (trimmed.toUpperCase().includes("UPDATE INVOICE_STYLES SET IS_DEFAULT = 0")) {
       this.invoiceStyles = this.invoiceStyles.map((s) => ({ ...s, is_default: 0, updated_at: new Date().toISOString() }));
@@ -1004,22 +1075,29 @@ class WebLocalSqliteClient implements DbClient {
         if (Number(s.id) === targetId) {
           return {
             ...s,
-            name: bindValues[0] ?? s.name,
+            name: bindValues[0] !== undefined ? String(bindValues[0]) : s.name,
             description: bindValues[1] !== undefined ? bindValues[1] : s.description,
             logo_id: bindValues[2] !== undefined ? bindValues[2] : s.logo_id,
-            primary_color: bindValues[3] ?? s.primary_color,
-            header_color: bindValues[4] ?? s.header_color,
-            accent_color: bindValues[5] ?? s.accent_color,
-            footer_color: bindValues[6] ?? s.footer_color,
-            footer_text: bindValues[7] !== undefined ? bindValues[7] : s.footer_text,
-            show_ice: bindValues[8] !== undefined ? Number(bindValues[8]) : s.show_ice,
-            show_tax_id: bindValues[9] !== undefined ? Number(bindValues[9]) : s.show_tax_id,
-            show_rc: bindValues[10] !== undefined ? Number(bindValues[10]) : s.show_rc,
-            show_cnss: bindValues[11] !== undefined ? Number(bindValues[11]) : s.show_cnss,
-            show_iban: bindValues[12] !== undefined ? Number(bindValues[12]) : s.show_iban,
-            show_phone: bindValues[13] !== undefined ? Number(bindValues[13]) : s.show_phone,
-            show_email: bindValues[14] !== undefined ? Number(bindValues[14]) : s.show_email,
-            show_address: bindValues[15] !== undefined ? Number(bindValues[15]) : s.show_address,
+            primary_color: bindValues[3] !== undefined ? String(bindValues[3]) : s.primary_color,
+            header_color: bindValues[4] !== undefined ? String(bindValues[4]) : s.header_color,
+            accent_color: bindValues[5] !== undefined ? String(bindValues[5]) : s.accent_color,
+            footer_color: bindValues[6] !== undefined ? String(bindValues[6]) : s.footer_color,
+            header_bg_color: bindValues[7] !== undefined ? String(bindValues[7]) : (s.header_bg_color || "#ca8a04"),
+            header_text_color: bindValues[8] !== undefined ? String(bindValues[8]) : (s.header_text_color || "#111827"),
+            table_header_bg_color: bindValues[9] !== undefined ? String(bindValues[9]) : (s.table_header_bg_color || "#1e293b"),
+            table_header_text_color: bindValues[10] !== undefined ? String(bindValues[10]) : (s.table_header_text_color || "#ffffff"),
+            footer_bg_color: bindValues[11] !== undefined ? String(bindValues[11]) : (s.footer_bg_color || "#ca8a04"),
+            footer_text_color: bindValues[12] !== undefined ? String(bindValues[12]) : (s.footer_text_color || "#111827"),
+            footer_text: bindValues[13] !== undefined ? String(bindValues[13]) : s.footer_text,
+            show_ice: bindValues[14] !== undefined ? Number(bindValues[14]) : s.show_ice,
+            show_tax_id: bindValues[15] !== undefined ? Number(bindValues[15]) : s.show_tax_id,
+            show_rc: bindValues[16] !== undefined ? Number(bindValues[16]) : s.show_rc,
+            show_cnss: bindValues[17] !== undefined ? Number(bindValues[17]) : s.show_cnss,
+            show_iban: bindValues[18] !== undefined ? Number(bindValues[18]) : s.show_iban,
+            show_phone: bindValues[19] !== undefined ? Number(bindValues[19]) : s.show_phone,
+            show_email: bindValues[20] !== undefined ? Number(bindValues[20]) : s.show_email,
+            show_address: bindValues[21] !== undefined ? Number(bindValues[21]) : s.show_address,
+            show_due_date: bindValues[22] !== undefined ? Number(bindValues[22]) : (s.show_due_date ?? 1),
             updated_at: new Date().toISOString(),
           };
         }

@@ -179,7 +179,11 @@ export const Style2Moderne: React.FC<StyleLayoutProps> = ({ documentData }) => {
             </thead>
             <tbody className="divide-y divide-slate-100 text-[11px]">
               {items.map((item, idx) => (
-                <tr key={item.id || idx} className="hover:bg-slate-50/50">
+                <tr
+                  key={item.id || idx}
+                  className="hover:bg-slate-50/50"
+                  style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                >
                   <td className={`py-3 px-4 font-semibold text-slate-800 ${isRtl ? "text-right" : "text-left"}`}>
                     {item.description}
                   </td>
