@@ -36,6 +36,10 @@ export const companyRepository = {
         rib_iban,
         currency,
         document_language,
+        invoice_prefix,
+        invoice_pattern,
+        invoice_sequence_padding,
+        invoice_next_number,
         updated_at
       FROM company_settings
       WHERE id = 1
@@ -63,6 +67,10 @@ export const companyRepository = {
         rib_iban: row.rib_iban || "",
         currency: row.currency || "MAD",
         document_language: row.document_language || "fr",
+        invoice_prefix: row.invoice_prefix !== undefined && row.invoice_prefix !== null ? row.invoice_prefix : "FAC",
+        invoice_pattern: row.invoice_pattern || "{PREFIX}-{YEAR}-{SEQ}",
+        invoice_sequence_padding: Number(row.invoice_sequence_padding) || 4,
+        invoice_next_number: Number(row.invoice_next_number) || 1,
         updated_at: row.updated_at,
       };
     }
@@ -98,6 +106,10 @@ export const companyRepository = {
         rib_iban = ?,
         currency = ?,
         document_language = ?,
+        invoice_prefix = ?,
+        invoice_pattern = ?,
+        invoice_sequence_padding = ?,
+        invoice_next_number = ?,
         updated_at = datetime('now')
       WHERE id = 1;
       `,
@@ -119,6 +131,10 @@ export const companyRepository = {
         data.rib_iban || "",
         data.currency || "MAD",
         data.document_language || "fr",
+        data.invoice_prefix !== undefined ? data.invoice_prefix : "FAC",
+        data.invoice_pattern || "{PREFIX}-{YEAR}-{SEQ}",
+        Number(data.invoice_sequence_padding) || 4,
+        Number(data.invoice_next_number) || 1,
       ]
     );
 

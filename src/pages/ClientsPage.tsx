@@ -102,7 +102,7 @@ export const ClientsPage: React.FC = () => {
           className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[44px] shrink-0"
         >
           <Plus size={20} />
-          <span>+ Nouveau client</span>
+          <span>Nouveau client</span>
         </button>
       </div>
 
@@ -277,7 +277,7 @@ export const ClientsPage: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer shadow-sm min-h-[44px]"
               >
                 <Plus size={18} />
-                <span>+ Nouveau client</span>
+                <span>Nouveau client</span>
               </button>
             </>
           )}

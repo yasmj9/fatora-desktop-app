@@ -11,16 +11,18 @@ import {
   Image as ImageIcon,
   Palette,
   HardDriveDownload,
+  Hash,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useDatabaseStatus } from "../context/DatabaseContext";
 import { CompanySettingsForm } from "../components/settings/CompanySettingsForm";
+import { InvoiceNumberingManager } from "../components/settings/InvoiceNumberingManager";
 import { LogoManager } from "../components/settings/LogoManager";
 import { InvoiceStyleManager } from "../components/settings/InvoiceStyleManager";
 import { BackupRestoreManager } from "../components/settings/BackupRestoreManager";
 
 export const ParametresPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"company" | "logos" | "styles" | "backup" | "system">("company");
+  const [activeTab, setActiveTab] = useState<"company" | "numbering" | "logos" | "styles" | "backup" | "system">("company");
   const [greetName, setGreetName] = useState("");
   const [greetMsg, setGreetMsg] = useState("");
   const [isGreeting, setIsGreeting] = useState(false);
@@ -68,12 +70,12 @@ export const ParametresPage: React.FC = () => {
         </div>
 
         {/* Full-width Tab Switcher */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-100 p-2 rounded-2xl border border-slate-200/80 shadow-xs w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-slate-100 p-2 rounded-2xl border border-slate-200/80 shadow-xs w-full">
           <button
             type="button"
             id="tab-company-settings"
             onClick={() => setActiveTab("company")}
-            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "company"
                 ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
@@ -84,9 +86,22 @@ export const ParametresPage: React.FC = () => {
           </button>
           <button
             type="button"
+            id="tab-numbering-settings"
+            onClick={() => setActiveTab("numbering")}
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "numbering"
+                ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            <Hash size={16} className="shrink-0" />
+            <span className="truncate">Numérotation</span>
+          </button>
+          <button
+            type="button"
             id="tab-logo-settings"
             onClick={() => setActiveTab("logos")}
-            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "logos"
                 ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
@@ -99,7 +114,7 @@ export const ParametresPage: React.FC = () => {
             type="button"
             id="tab-style-settings"
             onClick={() => setActiveTab("styles")}
-            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "styles"
                 ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
@@ -112,7 +127,7 @@ export const ParametresPage: React.FC = () => {
             type="button"
             id="tab-backup-settings"
             onClick={() => setActiveTab("backup")}
-            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "backup"
                 ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
@@ -125,7 +140,7 @@ export const ParametresPage: React.FC = () => {
             type="button"
             id="tab-system-settings"
             onClick={() => setActiveTab("system")}
-            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "system"
                 ? "bg-white text-blue-700 shadow-sm border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
@@ -139,7 +154,13 @@ export const ParametresPage: React.FC = () => {
 
       {activeTab === "company" ? (
         /* Company Settings Form */
-        <CompanySettingsForm onGoToLogos={() => setActiveTab("logos")} />
+        <CompanySettingsForm
+          onGoToLogos={() => setActiveTab("logos")}
+          onGoToNumbering={() => setActiveTab("numbering")}
+        />
+      ) : activeTab === "numbering" ? (
+        /* Invoice Numbering Tab */
+        <InvoiceNumberingManager />
       ) : activeTab === "logos" ? (
         /* Logo Manager Tab */
         <LogoManager />

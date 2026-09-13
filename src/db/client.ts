@@ -53,6 +53,10 @@ class WebLocalSqliteClient implements DbClient {
     rib_iban: "",
     currency: "MAD",
     document_language: "fr",
+    invoice_prefix: "FAC",
+    invoice_pattern: "{PREFIX}-{YEAR}-{SEQ}",
+    invoice_sequence_padding: 4,
+    invoice_next_number: 1,
     updated_at: new Date().toISOString(),
   };
   private services: Array<Record<string, unknown>> = [];
@@ -489,6 +493,10 @@ class WebLocalSqliteClient implements DbClient {
           rib_iban: bindValues[14] ?? "",
           currency: bindValues[15] ?? "MAD",
           document_language: bindValues[16] ?? "fr",
+          invoice_prefix: bindValues[17] !== undefined ? bindValues[17] : "FAC",
+          invoice_pattern: bindValues[18] ?? "{PREFIX}-{YEAR}-{SEQ}",
+          invoice_sequence_padding: Number(bindValues[19]) || 4,
+          invoice_next_number: Number(bindValues[20]) || 1,
           updated_at: new Date().toISOString(),
         };
         try {

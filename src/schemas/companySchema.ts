@@ -39,6 +39,12 @@ export const companySettingsSchema = z.object({
   // Préférences des documents
   currency: z.string(),
   document_language: z.enum(["fr", "ar", "en"]),
+
+  // Numérotation des factures
+  invoice_prefix: z.string().optional(),
+  invoice_pattern: z.string().min(1, "Le format de numérotation est requis"),
+  invoice_sequence_padding: z.number().min(1).max(8),
+  invoice_next_number: z.number().min(1),
 });
 
 export type CompanySettingsFormData = z.infer<typeof companySettingsSchema>;

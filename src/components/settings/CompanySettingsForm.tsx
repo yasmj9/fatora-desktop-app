@@ -14,16 +14,19 @@ import {
   ShieldAlert,
   Image as ImageIcon,
   ArrowRight,
+  Hash,
 } from "lucide-react";
 import { companySettingsSchema, CompanySettingsFormData } from "../../schemas/companySchema";
 import { useCompanySettings } from "../../hooks/useCompanySettings";
 import { useLogos } from "../../hooks/useLogos";
+import { formatInvoiceNumber } from "../../utils/invoiceNumberFormatter";
 
 interface CompanySettingsFormProps {
   onGoToLogos?: () => void;
+  onGoToNumbering?: () => void;
 }
 
-export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoToLogos }) => {
+export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoToLogos, onGoToNumbering }) => {
   const { settings, isLoading, isSaving, error, successMessage, saveSettings, clearMessages } =
     useCompanySettings();
   const { defaultLogo } = useLogos();
@@ -53,6 +56,10 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
       rib_iban: "",
       currency: "MAD",
       document_language: "fr",
+      invoice_prefix: "FAC",
+      invoice_pattern: "{PREFIX}-{YEAR}-{SEQ}",
+      invoice_sequence_padding: 4,
+      invoice_next_number: 1,
     },
   });
 
@@ -77,6 +84,10 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
         rib_iban: settings.rib_iban || "",
         currency: settings.currency || "MAD",
         document_language: (settings.document_language as "fr" | "ar" | "en") || "fr",
+        invoice_prefix: settings.invoice_prefix !== undefined && settings.invoice_prefix !== null ? settings.invoice_prefix : "FAC",
+        invoice_pattern: settings.invoice_pattern || "{PREFIX}-{YEAR}-{SEQ}",
+        invoice_sequence_padding: Number(settings.invoice_sequence_padding) || 4,
+        invoice_next_number: Number(settings.invoice_next_number) || 1,
       });
     }
   }, [settings, reset]);
@@ -416,6 +427,43 @@ export const CompanySettingsForm: React.FC<CompanySettingsFormProps> = ({ onGoTo
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0"
             >
               <span>{defaultLogo ? "Gérer mes logos" : "Ajouter un logo"}</span>
+              <ArrowRight size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* INVOICE NUMBERING SHORTCUT */}
+        <div className="mt-3 pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <Hash size={22} />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                <span>Format de numérotation actif :</span>
+                <code className="font-mono bg-white px-2 py-0.5 rounded text-blue-700 border border-slate-200 text-xs font-bold">
+                  {formatInvoiceNumber({
+                    prefix: settings.invoice_prefix !== undefined && settings.invoice_prefix !== null ? settings.invoice_prefix : "FAC",
+                    pattern: settings.invoice_pattern || "{PREFIX}-{YEAR}-{SEQ}",
+                    sequenceNumber: Number(settings.invoice_next_number) || 1,
+                    padding: Number(settings.invoice_sequence_padding) || 4,
+                  })}
+                </code>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Personnalisez la structure (ex: <code className="font-mono">001/2026</code> ou <code className="font-mono">FACT-00001-2026</code>) dans l'onglet dédié.
+              </p>
+            </div>
+          </div>
+
+          {onGoToNumbering && (
+            <button
+              type="button"
+              id="btn-manage-numbering-shortcut"
+              onClick={onGoToNumbering}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-blue-700 border border-slate-300 font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              <span>Personnaliser le format</span>
               <ArrowRight size={14} />
             </button>
           )}

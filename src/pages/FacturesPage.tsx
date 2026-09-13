@@ -224,6 +224,7 @@ export const FacturesPage: React.FC<FacturesPageProps> = ({ initialInvoiceId }) 
         client_ice: selectedClient.ice,
         client_if: selectedClient.if_tax,
         client_rc: selectedClient.rc,
+        tax_rate: 20,
         items: draftItems.map((it, idx) => ({
           service_id: it.service_id,
           position: idx,
@@ -239,7 +240,7 @@ export const FacturesPage: React.FC<FacturesPageProps> = ({ initialInvoiceId }) 
           discount_type: it.discount_type,
           discount_rate: it.discount_rate,
           discount_amount_cents: it.discount_amount_cents,
-          tax_rate: it.tax_rate,
+          tax_rate: it.tax_rate !== undefined ? it.tax_rate : 20,
         })),
         initial_payment:
           draftPayment.paid_amount_cents > 0
@@ -681,7 +682,7 @@ export const FacturesPage: React.FC<FacturesPageProps> = ({ initialInvoiceId }) 
               className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[44px]"
             >
               <Plus size={18} />
-              <span>+ Nouvelle facture</span>
+              <span>Nouvelle facture</span>
             </button>
           </div>
 

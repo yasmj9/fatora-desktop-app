@@ -82,7 +82,7 @@ export function buildDocumentData(
 
     subtotalCents: invoice.subtotal_cents,
     discountCents: invoice.discount_amount_cents || 0,
-    taxRate: invoice.tax_rate || 0,
+    taxRate: invoice.tax_rate !== undefined && invoice.tax_rate !== null ? invoice.tax_rate : 20,
     taxAmountCents: invoice.tax_amount_cents || 0,
     totalCents: invoice.total_cents,
     paidAmountCents: invoice.paid_amount_cents || 0,

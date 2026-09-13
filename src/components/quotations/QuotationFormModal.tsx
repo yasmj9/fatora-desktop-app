@@ -52,7 +52,7 @@ export const QuotationFormModal: React.FC<QuotationFormModalProps> = ({
   const [currency, setCurrency] = useState<string>("MAD");
 
   const [items, setItems] = useState<ItemRow[]>([
-    { name: "", description: "", quantity: 1, unit: "U", unit_price: 0, tax_rate: 0 },
+    { name: "", description: "", quantity: 1, unit: "U", unit_price: 0, tax_rate: 20 },
   ]);
 
   const [validUntilDate, setValidUntilDate] = useState<string>(() => {
@@ -118,7 +118,7 @@ export const QuotationFormModal: React.FC<QuotationFormModalProps> = ({
   const handleAddItem = () => {
     setItems((prev) => [
       ...prev,
-      { name: "", description: "", quantity: 1, unit: "U", unit_price: 0, tax_rate: 0 },
+      { name: "", description: "", quantity: 1, unit: "U", unit_price: 0, tax_rate: 20 },
     ]);
   };
 
@@ -143,7 +143,7 @@ export const QuotationFormModal: React.FC<QuotationFormModalProps> = ({
               description: service.description_fr || "",
               unit: service.default_unit || "U",
               unit_price: service.default_price || 0,
-              tax_rate: 0,
+              tax_rate: 20,
             }
           : it
       )
@@ -276,7 +276,7 @@ export const QuotationFormModal: React.FC<QuotationFormModalProps> = ({
                   className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
                 >
                   <Plus size={14} />
-                  <span>+ Nouveau client</span>
+                  <span>Nouveau client</span>
                 </button>
               </div>
 

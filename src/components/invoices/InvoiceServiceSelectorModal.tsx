@@ -162,7 +162,7 @@ export const InvoiceServiceSelectorModal: React.FC<InvoiceServiceSelectorModalPr
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors cursor-pointer shadow-xs"
                 >
                   <Plus size={14} />
-                  <span>+ Nouveau service</span>
+                  <span>Nouveau service</span>
                 </button>
               </div>
             </div>

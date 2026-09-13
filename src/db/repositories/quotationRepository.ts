@@ -495,9 +495,9 @@ export const quotationRepository = {
       throw new Error("Ce devis ne contient aucune prestation à facturer.");
     }
 
-    // 1. Generate a NEW sequential invoice number (e.g. "FAC-2026-0001")
+    // 1. Generate a NEW sequential invoice number based on company settings
     const currentYear = new Date().getFullYear();
-    const nextInvoiceData = await invoiceRepository.getNextInvoiceNumber(currentYear, "FAC");
+    const nextInvoiceData = await invoiceRepository.getNextInvoiceNumber(currentYear);
 
     // 2. Prepare financials from quotation items snapshot
     const financialCalc = calculateInvoiceFinancials({

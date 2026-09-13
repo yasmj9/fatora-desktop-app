@@ -10,6 +10,7 @@ import {
   InvoiceStatus,
 } from "../../types/invoice";
 import { calculateInvoiceFinancials, toCents } from "../../utils/money";
+import { formatInvoiceNumber } from "../../utils/invoiceNumberFormatter";
 
 export interface InvoiceStats {
   totalInvoicesCount: number;
@@ -23,24 +24,41 @@ export interface InvoiceStats {
 
 export const invoiceRepository = {
   /**
-   * Generates the next sequential invoice number for a given year and prefix.
-   * Format: `${prefix}-${year}-${0001}` (e.g. "FAC-2026-0001")
+   * Generates the next sequential invoice number based on company settings and year.
+   * Supports customizable patterns like "{SEQ}/{YEAR}", "FACT-{SEQ}-{YEAR}", "{PREFIX}-{YEAR}-{SEQ}", etc.
    */
   async getNextInvoiceNumber(
     year: number = new Date().getFullYear(),
-    prefix: string = "FAC"
+    overridePrefix?: string
   ): Promise<{ invoiceNumber: string; sequenceNumber: number; sequenceYear: number; prefix: string }> {
     const db = await getDatabaseAsync();
+    const settings = await companyRepository.getSettings();
 
+    const prefix =
+      overridePrefix !== undefined
+        ? overridePrefix
+        : settings.invoice_prefix !== undefined && settings.invoice_prefix !== null
+        ? settings.invoice_prefix
+        : "FAC";
+    const pattern = settings.invoice_pattern || "{PREFIX}-{YEAR}-{SEQ}";
+    const padding = Number(settings.invoice_sequence_padding) || 4;
+    const minStartNumber = Number(settings.invoice_next_number) || 1;
+
+    // Get max sequence number for this year
     const rows = await db.select<{ max_seq: number | null }>(
-      `SELECT MAX(sequence_number) as max_seq FROM invoices WHERE sequence_year = ? AND prefix = ?`,
-      [year, prefix]
+      `SELECT MAX(sequence_number) as max_seq FROM invoices WHERE sequence_year = ?`,
+      [year]
     );
 
     const maxSeq = rows.length > 0 && rows[0].max_seq ? rows[0].max_seq : 0;
-    let sequenceNumber = maxSeq + 1;
-    let formattedSeq = String(sequenceNumber).padStart(4, "0");
-    let invoiceNumber = `${prefix}-${year}-${formattedSeq}`;
+    let sequenceNumber = Math.max(maxSeq + 1, minStartNumber);
+    let invoiceNumber = formatInvoiceNumber({
+      prefix,
+      pattern,
+      sequenceNumber,
+      year,
+      padding,
+    });
 
     // Ensure collision avoidance if gaps or existing records exist
     let exists = await db.select<{ id: number }>(
@@ -49,8 +67,13 @@ export const invoiceRepository = {
     );
     while (exists.length > 0) {
       sequenceNumber += 1;
-      formattedSeq = String(sequenceNumber).padStart(4, "0");
-      invoiceNumber = `${prefix}-${year}-${formattedSeq}`;
+      invoiceNumber = formatInvoiceNumber({
+        prefix,
+        pattern,
+        sequenceNumber,
+        year,
+        padding,
+      });
       exists = await db.select<{ id: number }>(
         `SELECT id FROM invoices WHERE invoice_number = ? LIMIT 1`,
         [invoiceNumber]
@@ -184,7 +207,7 @@ export const invoiceRepository = {
     const currentYear = new Date().getFullYear();
     const nextNumberData = await this.getNextInvoiceNumber(
       input.sequence_year || currentYear,
-      input.prefix || "FAC"
+      input.prefix
     );
 
     const invoiceNumber = input.invoice_number || nextNumberData.invoiceNumber;
@@ -275,6 +298,7 @@ export const invoiceRepository = {
 
     // 4. Calculate Financials accurately using integer cents
     const initialPaymentCents = Math.max(0, input.initial_payment?.amount_cents || 0);
+    const effectiveGlobalTaxRate = input.tax_rate !== undefined ? input.tax_rate : 20;
 
     const financialCalc = calculateInvoiceFinancials({
       items: input.items.map((item) => ({
@@ -283,12 +307,12 @@ export const invoiceRepository = {
         discountType: item.discount_type,
         discountRate: item.discount_rate,
         discountAmountCents: item.discount_amount_cents,
-        taxRate: item.tax_rate,
+        taxRate: item.tax_rate !== undefined ? item.tax_rate : effectiveGlobalTaxRate,
       })),
       globalDiscountType: input.discount_type,
       globalDiscountRate: input.discount_rate,
       globalDiscountAmountCents: input.discount_amount_cents,
-      globalTaxRate: input.tax_rate,
+      globalTaxRate: effectiveGlobalTaxRate,
       paidAmountCents: initialPaymentCents,
     });
 
@@ -412,7 +436,7 @@ export const invoiceRepository = {
           input.discount_type || "fixed",
           input.discount_rate || 0,
           financialCalc.discountAmountCents,
-          input.tax_rate || 0,
+          effectiveGlobalTaxRate,
           financialCalc.taxAmountCents,
           financialCalc.totalCents,
           paidAmountCents,
@@ -471,7 +495,7 @@ export const invoiceRepository = {
             itemInput.discount_type || "fixed",
             itemInput.discount_rate || 0,
             itemCalc ? itemCalc.discountAmountCents : 0,
-            itemInput.tax_rate || 0,
+            itemInput.tax_rate !== undefined ? itemInput.tax_rate : effectiveGlobalTaxRate,
             itemCalc ? itemCalc.taxAmountCents : 0,
             itemCalc ? itemCalc.totalCents : toCents((itemInput.quantity * itemInput.unit_price_cents) / 100),
           ]

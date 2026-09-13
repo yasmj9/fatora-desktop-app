@@ -17,6 +17,10 @@ export interface CompanySettings {
   rib_iban: string;
   currency: string;
   document_language: string;
+  invoice_prefix?: string;
+  invoice_pattern?: string;
+  invoice_sequence_padding?: number;
+  invoice_next_number?: number;
   updated_at?: string;
 }
 
@@ -38,4 +42,8 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
   rib_iban: "",
   currency: "MAD",
   document_language: "fr",
+  invoice_prefix: "FAC",
+  invoice_pattern: "{PREFIX}-{YEAR}-{SEQ}",
+  invoice_sequence_padding: 4,
+  invoice_next_number: 1,
 };

@@ -95,7 +95,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
       discount_type: "percentage",
       discount_rate: 0,
       discount_amount_cents: 0,
-      tax_rate: 0,
+      tax_rate: 20,
       tax_amount_cents: 0,
       subtotal_cents: 0,
       total_cents: 0,
@@ -125,7 +125,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
       discount_type: "percentage",
       discount_rate: 0,
       discount_amount_cents: 0,
-      tax_rate: 0,
+      tax_rate: 20,
       tax_amount_cents: 0,
       subtotal_cents: 0,
       total_cents: 0,
@@ -202,7 +202,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
             </p>
           </div>
 
-          {/* Obvious "+ Ajouter un service" button */}
+          {/* Obvious "Ajouter un service" button */}
           <button
             type="button"
             id="btn-ajouter-un-service-main"
@@ -210,7 +210,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
             className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-base transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[48px] shrink-0"
           >
             <Plus size={22} className="stroke-[2.5]" />
-            <span>+ Ajouter un service</span>
+            <span>Ajouter un service</span>
           </button>
         </div>
 
@@ -281,7 +281,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
             className="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-base transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[48px]"
           >
             <Plus size={20} className="stroke-[2.5]" />
-            <span>+ Ajouter un service</span>
+            <span>Ajouter un service</span>
           </button>
         </div>
       ) : (
@@ -627,7 +627,7 @@ export const InvoiceItemsSection: React.FC<InvoiceItemsSectionProps> = ({
               className="inline-flex items-center gap-2 px-5 py-3 bg-white hover:bg-blue-50/60 border border-slate-300 hover:border-blue-400 text-slate-800 hover:text-blue-700 font-bold rounded-xl text-sm transition-all cursor-pointer shadow-xs"
             >
               <Plus size={18} className="text-blue-600" />
-              <span>+ Ajouter un autre service</span>
+              <span>Ajouter un autre service</span>
             </button>
           </div>
 

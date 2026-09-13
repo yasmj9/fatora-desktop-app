@@ -116,7 +116,7 @@ export const InvoiceClientSelector: React.FC<InvoiceClientSelectorProps> = ({
               className="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all cursor-pointer shadow-sm hover:shadow-md min-h-[48px] shrink-0"
             >
               <Plus size={20} />
-              <span>+ Nouveau client</span>
+              <span>Nouveau client</span>
             </button>
           )}
         </div>
@@ -316,7 +316,7 @@ export const InvoiceClientSelector: React.FC<InvoiceClientSelectorProps> = ({
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-xs min-h-[40px]"
               >
                 <Plus size={16} />
-                <span>+ Créer le client {searchQuery ? `"${searchQuery}"` : ""}</span>
+                <span>Créer le client {searchQuery ? `"${searchQuery}"` : ""}</span>
               </button>
             </div>
           )}
