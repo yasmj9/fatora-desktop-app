@@ -28,29 +28,31 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
   const isRtl = language === "ar";
   const labels = DOCUMENT_TRANSLATIONS[language] || DOCUMENT_TRANSLATIONS.fr;
 
-  // Default header background color: dark yellow (#ca8a04)
+  // Header and Footer background colors (default dark yellow / amber)
   const headerBg = style.header_bg_color || "#ca8a04";
   const headerText = style.header_text_color || "#111827";
   const tableHeaderBg = style.table_header_bg_color || "#1e293b";
   const tableHeaderText = style.table_header_text_color || "#ffffff";
   const footerBg = style.footer_bg_color || headerBg;
   const footerTextClr = style.footer_text_color || headerText;
+  const accentColor = style.accent_color || "#ca8a04";
 
   return (
     <div
       dir={isRtl ? "rtl" : "ltr"}
-      className="bg-white text-slate-800 text-xs shadow-sm font-sans rounded-xl border border-slate-200 flex flex-col justify-between min-h-[820px] overflow-hidden"
+      className="text-slate-800 text-xs font-sans rounded-xl border border-slate-200 flex flex-col justify-between min-h-[840px] overflow-hidden"
       style={{
+        backgroundColor: "#ffffff",
         fontFamily: isRtl
           ? "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans Arabic', 'Cairo', 'Amiri', 'Tahoma', sans-serif"
-          : undefined,
+          : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       }}
     >
       <div className="flex flex-col flex-1">
         {/* TOP FULL-WIDTH HEADER with margin on top and dark yellow background */}
         <div className="pt-3 px-3">
           <div
-            className="w-full px-6 py-5 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xs"
+            className="w-full px-6 py-5 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4"
             style={{
               backgroundColor: headerBg,
               color: headerText,
@@ -66,11 +68,11 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
                 />
               ) : null}
               <div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight uppercase">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight uppercase" style={{ color: headerText }}>
                   {company.name || "Nom de l'entreprise"}
                 </h1>
                 {company.city && (
-                  <p className="text-xs font-semibold opacity-85">
+                  <p className="text-xs font-semibold opacity-90" style={{ color: headerText }}>
                     {company.city}{company.country ? `, ${company.country}` : ""}
                   </p>
                 )}
@@ -79,11 +81,11 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
 
             {/* RIGHT: Invoice Title and Invoice Number */}
             <div className={`${isRtl ? "sm:text-left" : "sm:text-right"} space-y-0.5`}>
-              <div className="text-xl sm:text-2xl font-black uppercase tracking-wider">
+              <div className="text-xl sm:text-2xl font-black uppercase tracking-wider" style={{ color: headerText }}>
                 {labels.invoiceTitle}
               </div>
-              <div className="text-sm font-bold font-mono tracking-wide opacity-95">
-                {labels.invoiceNumber} : <span className="font-extrabold">#{documentNumber}</span>
+              <div className="text-sm font-bold font-mono tracking-wide" style={{ color: headerText }}>
+                {labels.invoiceNumber} : <span className="font-black">#{documentNumber}</span>
               </div>
             </div>
           </div>
@@ -92,51 +94,80 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
         {/* BODY CONTAINER */}
         <div className="p-6 sm:p-8 space-y-6 flex-1 flex flex-col">
           {/* SECTION 2: BILL TO (LEFT) & FROM (RIGHT) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-2">
-            {/* LEFT: Bill To (Client information) */}
-            <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-100 space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-2">
+            {/* LEFT: Facturé à (Client information) */}
+            <div
+              className="p-4 rounded-xl border space-y-2"
+              style={{
+                backgroundColor: "#f8fafc",
+                borderColor: "#e2e8f0",
+              }}
+            >
               <div
-                className="text-[11px] font-extrabold uppercase tracking-wider pb-1 border-b border-slate-200"
-                style={{ color: style.accent_color || "#ca8a04" }}
+                className="text-[11px] font-extrabold uppercase tracking-wider pb-1 border-b"
+                style={{
+                  color: accentColor,
+                  borderColor: "#e2e8f0",
+                }}
               >
                 {labels.billedTo}
               </div>
-              <div className="font-bold text-slate-900 text-sm">{client.name}</div>
+              <div className="font-bold text-sm" style={{ color: "#0f172a" }}>
+                {client.name}
+              </div>
               {client.address && (
-                <div className="text-[11px] text-slate-600">
-                  <span className="font-medium text-slate-500">{labels.address} :</span> {client.address}
+                <div className="text-[11px]" style={{ color: "#334155" }}>
+                  <span className="font-semibold text-slate-500">{labels.address} :</span> {client.address}
                   {client.city ? `, ${client.city}` : ""}
                 </div>
               )}
               {client.phone && (
-                <div className="text-[11px] text-slate-600">
-                  <span className="font-medium text-slate-500">{labels.phone} :</span> {client.phone}
+                <div className="text-[11px]" style={{ color: "#334155" }}>
+                  <span className="font-semibold text-slate-500">{labels.phone} :</span> {client.phone}
                 </div>
               )}
               {style.show_ice && client.ice && (
-                <div className="text-[11px] font-mono text-slate-700 bg-white/80 px-2 py-0.5 rounded border border-slate-200/60 inline-block">
+                <div
+                  className="text-[11px] font-mono px-2 py-0.5 rounded border inline-block"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#cbd5e1",
+                    color: "#1e293b",
+                  }}
+                >
                   <span className="font-bold text-slate-600">{labels.ice} :</span> {client.ice}
                 </div>
               )}
             </div>
 
-            {/* RIGHT: From (Company information) */}
-            <div className={`bg-slate-50/70 p-4 rounded-xl border border-slate-100 space-y-2 ${isRtl ? "text-left" : "text-right"}`}>
+            {/* RIGHT: Émetteur (Company information) */}
+            <div
+              className={`p-4 rounded-xl border space-y-2 ${isRtl ? "text-left" : "text-right"}`}
+              style={{
+                backgroundColor: "#f8fafc",
+                borderColor: "#e2e8f0",
+              }}
+            >
               <div
-                className="text-[11px] font-extrabold uppercase tracking-wider pb-1 border-b border-slate-200"
-                style={{ color: style.accent_color || "#ca8a04" }}
+                className="text-[11px] font-extrabold uppercase tracking-wider pb-1 border-b"
+                style={{
+                  color: accentColor,
+                  borderColor: "#e2e8f0",
+                }}
               >
                 {labels.issuerInfo}
               </div>
-              <div className="font-bold text-slate-900 text-sm">{company.name}</div>
+              <div className="font-bold text-sm" style={{ color: "#0f172a" }}>
+                {company.name}
+              </div>
               
               {style.show_address && company.address && (
-                <div className="text-[11px] text-slate-600">
+                <div className="text-[11px]" style={{ color: "#334155" }}>
                   {company.address}{company.city ? `, ${company.city}` : ""}
                 </div>
               )}
 
-              <div className="text-[11px] text-slate-600 space-y-0.5">
+              <div className="text-[11px] space-y-0.5" style={{ color: "#334155" }}>
                 {style.show_phone && company.phone && (
                   <div>
                     <span className="text-slate-500">{labels.phone} :</span> {company.phone}
@@ -150,35 +181,53 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
               </div>
 
               {/* Legal Badges (ICE, IF, RC, CNSS) */}
-              <div className={`flex flex-wrap gap-1.5 text-[10px] font-mono text-slate-600 pt-1 ${isRtl ? "justify-start" : "justify-end"}`}>
+              <div className={`flex flex-wrap gap-1.5 text-[10px] font-mono pt-1 ${isRtl ? "justify-start" : "justify-end"}`}>
                 {style.show_ice && company.ice && (
-                  <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  <span
+                    className="px-1.5 py-0.5 rounded border"
+                    style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#1e293b" }}
+                  >
                     <strong>{labels.ice}:</strong> {company.ice}
                   </span>
                 )}
                 {style.show_tax_id && company.ifTax && (
-                  <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  <span
+                    className="px-1.5 py-0.5 rounded border"
+                    style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#1e293b" }}
+                  >
                     <strong>{labels.ifTax}:</strong> {company.ifTax}
                   </span>
                 )}
                 {style.show_rc && company.rc && (
-                  <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  <span
+                    className="px-1.5 py-0.5 rounded border"
+                    style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#1e293b" }}
+                  >
                     <strong>{labels.rc}:</strong> {company.rc}
                   </span>
                 )}
                 {style.show_cnss && company.cnss && (
-                  <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  <span
+                    className="px-1.5 py-0.5 rounded border"
+                    style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#1e293b" }}
+                  >
                     <strong>{labels.cnss}:</strong> {company.cnss}
                   </span>
                 )}
               </div>
 
               {/* Date and Due Date */}
-              <div className="text-[11px] text-slate-700 font-medium pt-1.5 border-t border-slate-200/80">
+              <div
+                className="text-[11px] font-medium pt-1.5 border-t"
+                style={{
+                  color: "#1e293b",
+                  borderColor: "#e2e8f0",
+                }}
+              >
                 <span>{labels.date} : <strong>{date}</strong></span>
                 {style.show_due_date !== false && dueDate && (
                   <span className="ml-2 inline-block">
-                    | {labels.dueDate} : <strong className="text-amber-800">{dueDate}</strong>
+                    | {labels.dueDate} : <strong style={{ color: "#b45309" }}>{dueDate}</strong>
                   </span>
                 )}
               </div>
@@ -186,7 +235,10 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
           </div>
 
           {/* SECTION 3: LINE ITEMS TABLE */}
-          <div className="border border-slate-200 rounded-lg overflow-hidden mt-2">
+          <div
+            className="rounded-lg overflow-hidden border mt-2"
+            style={{ borderColor: "#e2e8f0" }}
+          >
             <table className="w-full border-collapse">
               <thead>
                 <tr
@@ -208,17 +260,37 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 text-[11px]">
+              <tbody className="text-[11px]">
                 {items.map((item, idx) => (
-                  <tr key={item.id || idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
-                    <td className={`py-3 px-4 font-medium text-slate-900 ${isRtl ? "text-right" : "text-left"}`}>
+                  <tr
+                    key={item.id || idx}
+                    style={{
+                      backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
+                      borderTop: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <td
+                      className={`py-3 px-4 font-semibold ${isRtl ? "text-right" : "text-left"}`}
+                      style={{ color: "#0f172a" }}
+                    >
                       {item.description}
                     </td>
-                    <td className={`py-3 px-4 font-mono ${isRtl ? "text-left" : "text-right"}`}>
+                    <td
+                      className={`py-3 px-4 font-mono ${isRtl ? "text-left" : "text-right"}`}
+                      style={{ color: "#334155" }}
+                    >
                       {formatMoney(item.unitPriceCents, currency, false)}
                     </td>
-                    <td className="py-3 px-4 text-center font-mono font-medium">{item.quantity}</td>
-                    <td className={`py-3 px-4 font-mono font-bold text-slate-900 ${isRtl ? "text-left" : "text-right"}`}>
+                    <td
+                      className="py-3 px-4 text-center font-mono font-bold"
+                      style={{ color: "#0f172a" }}
+                    >
+                      {item.quantity}
+                    </td>
+                    <td
+                      className={`py-3 px-4 font-mono font-bold ${isRtl ? "text-left" : "text-right"}`}
+                      style={{ color: "#0f172a" }}
+                    >
                       {formatMoney(item.totalCents, currency, false)}
                     </td>
                   </tr>
@@ -229,16 +301,28 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
 
           {/* SECTION 4: SUMMARY OF TOTAL WITH TAX */}
           <div className="flex justify-end pt-2">
-            <div className="w-full sm:w-80 space-y-1.5 text-[11px] bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
-              <div className="flex justify-between text-slate-600 py-1 border-b border-slate-200">
+            <div
+              className="w-full sm:w-80 space-y-1.5 text-[11px] p-4 rounded-xl border"
+              style={{
+                backgroundColor: "#f8fafc",
+                borderColor: "#e2e8f0",
+              }}
+            >
+              <div
+                className="flex justify-between py-1 border-b"
+                style={{ borderColor: "#e2e8f0", color: "#475569" }}
+              >
                 <span className="font-semibold uppercase">{labels.subtotalHT}</span>
-                <span className="font-mono font-bold text-slate-800">
+                <span className="font-mono font-bold" style={{ color: "#0f172a" }}>
                   {formatMoney(subtotalCents, currency, true)}
                 </span>
               </div>
 
               {discountCents > 0 && (
-                <div className="flex justify-between text-emerald-700 py-1 border-b border-slate-200">
+                <div
+                  className="flex justify-between py-1 border-b"
+                  style={{ borderColor: "#e2e8f0", color: "#047857" }}
+                >
                   <span className="font-semibold uppercase">{labels.discount}</span>
                   <span className="font-mono font-bold">
                     - {formatMoney(discountCents, currency, true)}
@@ -247,54 +331,78 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
               )}
 
               {taxAmountCents > 0 && (
-                <div className="flex justify-between text-slate-600 py-1 border-b border-slate-200">
+                <div
+                  className="flex justify-between py-1 border-b"
+                  style={{ borderColor: "#e2e8f0", color: "#475569" }}
+                >
                   <span className="font-semibold uppercase">
                     {labels.tax} ({taxRate}%)
                   </span>
-                  <span className="font-mono font-bold text-slate-800">
+                  <span className="font-mono font-bold" style={{ color: "#0f172a" }}>
                     {formatMoney(taxAmountCents, currency, true)}
                   </span>
                 </div>
               )}
 
               <div
-                className="flex justify-between text-base font-black pt-2.5 pb-1 border-t-2 border-slate-900"
-                style={{ color: style.primary_color || "#1e293b" }}
+                className="flex justify-between text-base font-black pt-2.5 pb-1 border-t-2"
+                style={{
+                  borderColor: "#0f172a",
+                  color: style.primary_color || "#0f172a",
+                }}
               >
                 <span className="uppercase">{labels.totalTTC}</span>
-                <span className="font-mono font-extrabold">{formatMoney(totalCents, currency, true)}</span>
+                <span className="font-mono font-black" style={{ color: "#0f172a" }}>
+                  {formatMoney(totalCents, currency, true)}
+                </span>
               </div>
             </div>
           </div>
 
           {/* SECTION 5: LOWER GRID (REF OF PAYMENT ON LEFT, SIGNATURE ON RIGHT) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 mt-auto items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 mt-auto items-end">
             {/* LEFT: Reference of payment / Bank details & notes */}
-            <div className="space-y-2 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+            <div
+              className="space-y-2 p-4 rounded-xl border"
+              style={{
+                backgroundColor: "#f8fafc",
+                borderColor: "#e2e8f0",
+              }}
+            >
               <div
-                className="text-[10px] font-extrabold uppercase tracking-wider pb-1 border-b border-slate-200"
-                style={{ color: style.accent_color || "#ca8a04" }}
+                className="text-[10px] font-extrabold uppercase tracking-wider pb-1 border-b"
+                style={{
+                  color: accentColor,
+                  borderColor: "#e2e8f0",
+                }}
               >
                 {labels.bankDetails}
               </div>
               
               {style.show_iban && company.ribIban ? (
-                <div className="text-[11px] text-slate-700 font-mono space-y-1">
+                <div className="text-[11px] font-mono space-y-1" style={{ color: "#334155" }}>
                   {company.bankName && (
-                    <div className="font-bold text-slate-900">{company.bankName}</div>
+                    <div className="font-bold" style={{ color: "#0f172a" }}>{company.bankName}</div>
                   )}
-                  <div className="bg-white p-2 rounded border border-slate-200 text-xs font-bold text-slate-800">
+                  <div
+                    className="p-2 rounded border text-xs font-bold"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderColor: "#cbd5e1",
+                      color: "#0f172a",
+                    }}
+                  >
                     {company.ribIban}
                   </div>
                 </div>
               ) : (
-                <div className="text-[11px] text-slate-500 italic">
+                <div className="text-[11px] italic" style={{ color: "#64748b" }}>
                   Paiement selon les conditions convenues.
                 </div>
               )}
 
               {style.footer_text && (
-                <p className="text-[10px] text-slate-500 pt-1 leading-relaxed">
+                <p className="text-[10px] pt-1 leading-relaxed" style={{ color: "#64748b" }}>
                   {style.footer_text}
                 </p>
               )}
@@ -302,15 +410,18 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
 
             {/* RIGHT: Signature Section */}
             <div className="flex flex-col items-center sm:items-end text-center sm:text-right space-y-3 p-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
                 {labels.signature}
               </div>
-              <div className="h-16 w-48 border-b-2 border-dashed border-slate-400 flex items-end justify-center pb-1">
-                <span className="text-[10px] font-serif italic text-slate-400">
+              <div
+                className="h-16 w-48 border-b-2 border-dashed flex items-end justify-center pb-1"
+                style={{ borderColor: "#94a3b8" }}
+              >
+                <span className="text-[10px] font-serif italic" style={{ color: "#94a3b8" }}>
                   Cachet & Signature
                 </span>
               </div>
-              <div className="text-[10px] font-bold text-slate-600">
+              <div className="text-[10px] font-bold" style={{ color: "#334155" }}>
                 {company.name}
               </div>
             </div>
@@ -321,7 +432,7 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
       {/* SECTION 6: FULL-WIDTH FOOTER with background color matching header */}
       <div className="p-3 pt-0 mt-auto">
         <div
-          className="w-full px-6 py-3 rounded-lg text-center text-[10px] font-semibold leading-relaxed shadow-xs"
+          className="w-full px-6 py-3 rounded-lg text-center text-[10px] font-bold leading-relaxed shadow-xs"
           style={{
             backgroundColor: footerBg,
             color: footerTextClr,
@@ -333,6 +444,3 @@ export const Style1Classique: React.FC<StyleLayoutProps> = ({ documentData }) =>
     </div>
   );
 };
-
-
-

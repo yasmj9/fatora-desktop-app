@@ -14,15 +14,26 @@ export const pdfService = {
       logging: false,
       backgroundColor: "#ffffff",
       onclone: (clonedDoc) => {
-        // Helper to check and sanitize modern color functions
-        const sanitizeColor = (val: string): string => {
-          if (!val) return val;
-          if (val.includes("oklch") || val.includes("oklab")) {
-            return val
-              .replace(/oklch\([^)]+\)/g, "#3b82f6")
-              .replace(/oklab\([^)]+\)/g, "#3b82f6");
+        // Helper to convert any modern color (oklch, oklab, color(srgb...), etc.) into valid sRGB hex/rgb
+        const colorCanvas = clonedDoc.createElement("canvas");
+        colorCanvas.width = 1;
+        colorCanvas.height = 1;
+        const colorCtx = colorCanvas.getContext("2d");
+
+        const convertColor = (val: string): string => {
+          if (!val || (!val.includes("oklch") && !val.includes("oklab") && !val.includes("color("))) {
+            return val;
           }
-          return val;
+          if (!colorCtx) return "#1e293b";
+          try {
+            return val.replace(/(?:oklch|oklab|color)\([^)]+\)/gi, (match) => {
+              colorCtx.fillStyle = "#ffffff";
+              colorCtx.fillStyle = match;
+              return colorCtx.fillStyle || match;
+            });
+          } catch {
+            return val;
+          }
         };
 
         // Sanitize modern colors in inline styles
@@ -33,8 +44,8 @@ export const pdfService = {
             for (let i = 0; i < htmlEl.style.length; i++) {
               const prop = htmlEl.style[i];
               const val = htmlEl.style.getPropertyValue(prop);
-              if (val && (val.includes("oklch") || val.includes("oklab"))) {
-                htmlEl.style.setProperty(prop, sanitizeColor(val));
+              if (val && (val.includes("oklch") || val.includes("oklab") || val.includes("color("))) {
+                htmlEl.style.setProperty(prop, convertColor(val));
               }
             }
           }
@@ -43,10 +54,8 @@ export const pdfService = {
         // Sanitize modern colors in style tags and stylesheets
         const styleTags = clonedDoc.querySelectorAll("style");
         styleTags.forEach((tag) => {
-          if (tag.textContent && (tag.textContent.includes("oklch") || tag.textContent.includes("oklab"))) {
-            tag.textContent = tag.textContent
-              .replace(/oklch\([^)]+\)/g, "#3b82f6")
-              .replace(/oklab\([^)]+\)/g, "#3b82f6");
+          if (tag.textContent && (tag.textContent.includes("oklch") || tag.textContent.includes("oklab") || tag.textContent.includes("color("))) {
+            tag.textContent = convertColor(tag.textContent);
           }
         });
 
@@ -61,8 +70,8 @@ export const pdfService = {
                   for (let k = 0; k < rule.style.length; k++) {
                     const prop = rule.style[k];
                     const val = rule.style.getPropertyValue(prop);
-                    if (val && (val.includes("oklch") || val.includes("oklab"))) {
-                      rule.style.setProperty(prop, sanitizeColor(val));
+                    if (val && (val.includes("oklch") || val.includes("oklab") || val.includes("color("))) {
+                      rule.style.setProperty(prop, convertColor(val));
                     }
                   }
                 }
